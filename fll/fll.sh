@@ -1,3 +1,4 @@
+#!/bin/bash
 # This should be ran as a bash source file
 
 IFS=',' read -ra lines <<< "$*"
@@ -15,7 +16,6 @@ else
     counter=0
     for line in "${lines[@]}"; do
 	counter=$((counter + 1))
-	echo "$line"
 
         if [[ $line =~ ^[[:space:]]*$ ]]; then
 		:
