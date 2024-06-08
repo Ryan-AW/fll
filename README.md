@@ -17,7 +17,7 @@ user@test-user:/this/is/a/sample/path$
 
 
 **warning**
-This program must be run as a bash source file otherwise it will not be able to change the user's directory.
+This program must be run as a source file otherwise it will not be able to change the user's directory.
 Add this line to your ~/.bashrc file:
 ``` console
 alias fll='source /path/to/the/script/fll.sh'
