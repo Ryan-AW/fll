@@ -10,7 +10,13 @@ if [[ "${lines[*]}" =~ [[:space:]]*--reset[[:space:]]* ]]; then
     rm "$db_path"
     sqlite3 --separator " <--- " "$db_path" "CREATE TABLE links (keyword text, path text, unique(keyword));"
 elif [[ "${lines[*]}" =~ [[:space:]]*--help[[:space:]]* ]]; then
-    echo "help menu"
+    echo "Usage: fll [OPTIONS | SCRIPT]"
+    echo
+    echo "Options:"
+    echo "--help        Show this help message and exit"
+    echo "--reset       Reset the database (WARNING: this will delete all data) and exit"
+    echo
+    echo "SCRIPT        The script to execute, written with fll syntax"
 
 else
     counter=0
