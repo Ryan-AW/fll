@@ -1,7 +1,14 @@
 #!/bin/bash
 # This should be ran as a bash source file
 
-IFS=',' read -ra lines <<< "$*"
+
+if [[ -z "$ZSH_VERSION" ]]; then
+    IFS=',' read -ra lines <<< "$*"
+else
+    IFS=',' read -rA lines <<< "$*"
+    setopt BASH_REMATCH
+    setopt KSH_ARRAYS
+fi
 
 db_path="$(dirname "$BASH_SOURCE")/pathlinks.db"
 
@@ -46,12 +53,12 @@ else
 		elif [[ $line =~ ^[[:space:]]*([^[:space:]]{2,})[[:space:]]*=[[:space:]]*$ ]]; then
 			sqlite3 --separator " <--- " "$db_path" "REPLACE INTO links VALUES (\"${BASH_REMATCH[1]}\", \"$(pwd)\")"
 
-		elif [[ $line =~ ^[[:space:]]*([^[:space:]]{2,})[[:space:]]*=[[:space:]]*:([^[:space:]]{2,})[:space:]*$ ]]; then
-			sqlite3 --separator " <--- " "$db_path" "REPLACE INTO links VALUES (\"${BASH_REMATCH[1]}\", \"$(sqlite3 --separator " <--- " "$db_path" "SELECT path FROM links WHERE keyword = '${BASH_REMATCH[2]}'")\")"
-
-                elif [[ $line =~ ^[[:space:]]*[^[:space:]]{2,}[[:space:]]*=[[:space:]]*\?[^[:space:]][:space:]*$ ]]; then
+                elif [[ $line =~ ^[[:space:]]*[^[:space:]]{2,}[[:space:]]*=[[:space:]]*:[^[:space:]][:space:]*$ ]]; then
 			echo "IntervariableAssignmentError [line $counter]: other variable name must be at least 2 characters"
 			break
+
+		elif [[ $line =~ ^[[:space:]]*([^[:space:]]{2,})[[:space:]]*=[[:space:]]*:([^[:space:]]{2,})[:space:]*$ ]]; then
+			sqlite3 --separator " <--- " "$db_path" "REPLACE INTO links VALUES (\"${BASH_REMATCH[1]}\", \"$(sqlite3 --separator " <--- " "$db_path" "SELECT path FROM links WHERE keyword = '${BASH_REMATCH[2]}'")\")"
 
 		elif [[ $line =~ ^[[:space:]]*([^[:space:]]{2,})[[:space:]]*=[[:space:]]*([^[:space:]]+)[:space:]*$ ]]; then
 			sqlite3 --separator " <--- " "$db_path" "REPLACE INTO links VALUES (\"${BASH_REMATCH[1]}\", \"$(readlink -f "${BASH_REMATCH[2]}")\")"
@@ -81,3 +88,8 @@ fi
 
 unset db_path
 unset lines
+
+if [[ "$ZSH_VERSION" ]]; then
+    unsetopt BASH_REMATCH
+    unsetopt KSH_ARRAYS
+fi
