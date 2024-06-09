@@ -16,9 +16,6 @@ user@test-user:/this/is/a/sample/path$
 ```
 
 
-**warning**
-This program must be run as a source file otherwise it will not be able to change the user's directory.
-
 
 ## Install
 ``` console
@@ -28,3 +25,7 @@ then add this line to your ~/.bashrc file (or ~/.zshrc if you use Zsh):
 ``` console
 alias fll='source ~/.fll/fll/fll.sh'
 ```
+
+
+**warning**
+This program must be run as a source file otherwise it will not be able to change the user's directory.
