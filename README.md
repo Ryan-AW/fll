@@ -15,7 +15,10 @@ user@test-user:/$ fll path1
 user@test-user:/this/is/a/sample/path$ 
 ```
 
-
+## Install dependencies
+``` console
+sudo apt install sqlite3
+```
 
 ## Install
 ``` console
