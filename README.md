@@ -1,7 +1,7 @@
 # File Link Language (fll)
 ## Fll alows you to create short aliases for directory paths. Then next time to need to navigate there you can you the alias instead!
 
-Filepath Link Language (fll) is a simple yet powerful utility program
+File Link Language (fll) is a simple yet powerful utility program
 and scripting language; designed specifically for Linux terminal users.
 Fll allows you to create bookmarks for frequently used directory paths,
 making it easier and faster to navigate within a terminal.
