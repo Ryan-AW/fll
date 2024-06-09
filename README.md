@@ -18,7 +18,13 @@ user@test-user:/this/is/a/sample/path$
 
 **warning**
 This program must be run as a source file otherwise it will not be able to change the user's directory.
-Add this line to your ~/.bashrc file:
+
+
+## Install
 ``` console
-alias fll='source /path/to/the/script/fll.sh'
+git clone https://github.com/Ryan-AW/fll ~/.fll
+```
+then add this line to your ~/.bashrc file (or ~/.zshrc if you use Zsh):
+``` console
+alias fll='source ~/.fll/fll/fll.sh'
 ```
