@@ -53,14 +53,22 @@ else
 			break
 
 		elif [[ $line =~ ^[[:space:]]*([^[:space:]]+)[[:space:]]*=[[:space:]]*$ ]]; then
-			sqlite3 --separator " <--- " "$db_path" "REPLACE INTO links VALUES (\"${BASH_REMATCH[1]}\", \"$(pwd)\")"
+			sqlite3 --separator " <--- " "$db_path" "REPLACE INTO links VALUES ('${BASH_REMATCH[1]}', '$(pwd)')"
 
 		elif [[ $line =~ ^[[:space:]]*([^[:space:]]+)[[:space:]]*=[[:space:]]*:[[:space:]]*([^[:space:]]+)[[:space:]]*$ ]]; then
-			sqlite3 --separator " <--- " "$db_path" "REPLACE INTO links VALUES (\"${BASH_REMATCH[1]}\", (SELECT path FROM links WHERE keyword = '${BASH_REMATCH[2]}' LIMIT 1))"
+			output=$(sqlite3 --separator " <--- " "$db_path" "SELECT 1 FROM links WHERE keyword = '${BASH_REMATCH[2]}' LIMIT 1")
+
+			if [ -z "$output" ]; then
+				echo "AliasNotFound: '${BASH_REMATCH[2]}'"
+				break
+			else
+				output=$(sqlite3 --separator " <--- " "$db_path" "REPLACE INTO links VALUES ('${BASH_REMATCH[1]}', (SELECT path FROM links WHERE keyword = '${BASH_REMATCH[2]}' LIMIT 1));")
+			fi
+			unset output
 
 
 		elif [[ $line =~ ^[[:space:]]*([^[:space:]]+)[[:space:]]*=[[:space:]]*([^[:space:]]+)[[:space:]]*$ ]]; then
-			sqlite3 --separator " <--- " "$db_path" "REPLACE INTO links VALUES (\"${BASH_REMATCH[1]}\", \"$(readlink -f "${BASH_REMATCH[2]}")\")"
+			sqlite3 --separator " <--- " "$db_path" "REPLACE INTO links VALUES ('${BASH_REMATCH[1]}', '$(readlink -f "${BASH_REMATCH[2]}")')"
 		else
 			echo "InvalidAssignment [line $counter]: '$line'"
 		fi
@@ -68,7 +76,7 @@ else
 	elif [[ $line =~ ^[[:space:]]*(.)[[:space:]]*([^[:space:]]*)[[:space:]]*$ ]]; then
 		if [ ${BASH_REMATCH[1]} = ":" ]; then
 			if [ ${BASH_REMATCH[2]} ]; then
-				output=$(sqlite3 --separator " <--- " "$db_path" "SELECT * FROM links WHERE keyword = \"${BASH_REMATCH[2]}\"")
+				output=$(sqlite3 --separator " <--- " "$db_path" "SELECT * FROM links WHERE keyword = '${BASH_REMATCH[2]}'")
 			else
 				output=$(sqlite3 --separator " <--- " "$db_path" "SELECT * FROM links")
 			fi
@@ -83,17 +91,27 @@ else
 
 		elif [ ${BASH_REMATCH[1]} = "^" ]; then
 			if [ ${BASH_REMATCH[2]} ]; then
-				sqlite3 --separator " <--- " "$db_path" "DELETE FROM links WHERE keyword = \"${BASH_REMATCH[2]}\""
+				output=$(sqlite3 --separator " <--- " "$db_path" "SELECT 1 FROM links WHERE keyword = '${BASH_REMATCH[2]}'; DELETE FROM links WHERE keyword = '${BASH_REMATCH[2]}';")
+				if [ -z "$output" ]; then
+					echo "AliasNotFound: '${BASH_REMATCH[2]}'"
+					break
+				fi
+				unset output
 			else
-				sqlite3 --separator " <--- " "$db_path" "DELETE FROM links WHERE path = \"$(pwd)\""
+				output=$(sqlite3 --separator " <--- " "$db_path" "SELECT 1 FROM links WHERE path = '$(pwd)'; DELETE FROM links WHERE path = '$(pwd)';")
+				if [ -z "$output" ]; then
+					echo "AliasNotFound: No aliases set to current directory found"
+					break
+				fi
+				unset output
 			fi
 
 		else
-			new_path=$(sqlite3 --separator " <--- " "$db_path" "SELECT path FROM links WHERE keyword = \"${BASH_REMATCH[1]}${BASH_REMATCH[2]}\"")
+			new_path=$(sqlite3 --separator " <--- " "$db_path" "SELECT path FROM links WHERE keyword = '${BASH_REMATCH[1]}${BASH_REMATCH[2]}'")
 			if [[ $new_path ]]; then
 				cd "$new_path"
 			else
-				echo "AliasNotFound: \"${BASH_REMATCH[1]}${BASH_REMATCH[2]}\""
+				echo "AliasNotFound: '${BASH_REMATCH[1]}${BASH_REMATCH[2]}'"
 				break
 			fi
 			unset new_path
