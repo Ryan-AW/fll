@@ -87,10 +87,10 @@ else
 	elif [[ $line =~ ^[[:space:]]*(.)[[:space:]]*([^[:space:]]+)[[:space:]]*$ ]]; then
 		if [ ${BASH_REMATCH[1]} = ":" ]; then
 			output=$(sqlite3 --separator " <--- " "$db_path" "SELECT * FROM links WHERE keyword = \"${BASH_REMATCH[2]}\"")
-			if [ -z "$output" ]; then
-				echo "AliasNotFound: \"${BASH_REMATCH[2]}\""
-			else
+			if [ "$output" ]; then
 				echo "$output"
+			else
+				echo "AliasNotFound: \"${BASH_REMATCH[2]}\""
 				break
 			fi
 			unset output
