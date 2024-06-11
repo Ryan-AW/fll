@@ -29,6 +29,11 @@ then add this line to your ~/.bashrc file (or ~/.zshrc if you use Zsh):
 alias fll='source ~/.fll/fll.sh'
 ```
 
+To use fll in your current terminal session run this:
+``` console
+[ -n "$ZSH_VERSION" ] && source ~/.zshrc || source ~/.bashrc
+```
+
 
 **warning**
 This program must be run as a source file otherwise it will not be able to change the user's directory.
