@@ -52,10 +52,10 @@ else
 			echo "InvalidAssignmentError [line $counter]: ':' and '^' are reserved keywords"
 			break
 
-		elif [[ $line =~ ^[[:space:]]*([^[:space:]]+)[[:space:]]*=[[:space:]]*$ ]]; then
+		elif [[ $line =~ ^[[:space:]]*([[:alnum:].-_]+)[[:space:]]*=[[:space:]]*$ ]]; then
 			sqlite3 --separator " <--- " "$db_path" "REPLACE INTO links VALUES ('${BASH_REMATCH[1]}', '$(pwd)')"
 
-		elif [[ $line =~ ^[[:space:]]*([^[:space:]]+)[[:space:]]*=[[:space:]]*:[[:space:]]*([^[:space:]]+)[[:space:]]*$ ]]; then
+		elif [[ $line =~ ^[[:space:]]*([[:alnum:].-_]+)[[:space:]]*=[[:space:]]*:[[:space:]]*([[:alnum:].-_]+)[[:space:]]*$ ]]; then
 			output=$(sqlite3 --separator " <--- " "$db_path" "SELECT 1 FROM links WHERE keyword = '${BASH_REMATCH[2]}' LIMIT 1")
 
 			if [ -z "$output" ]; then
@@ -67,13 +67,13 @@ else
 			unset output
 
 
-		elif [[ $line =~ ^[[:space:]]*([^[:space:]]+)[[:space:]]*=[[:space:]]*([^[:space:]]+)[[:space:]]*$ ]]; then
+		elif [[ $line =~ ^[[:space:]]*([[:alnum:].-_]+)[[:space:]]*=[[:space:]]*([[:alnum:].-_]+)[[:space:]]*$ ]]; then
 			sqlite3 --separator " <--- " "$db_path" "REPLACE INTO links VALUES ('${BASH_REMATCH[1]}', '$(readlink -f "${BASH_REMATCH[2]}")')"
 		else
 			echo "InvalidAssignment [line $counter]: '$line'"
 		fi
 
-	elif [[ $line =~ ^[[:space:]]*(.)[[:space:]]*([^[:space:]]*)[[:space:]]*$ ]]; then
+	elif [[ $line =~ ^[[:space:]]*(.)[[:space:]]*([[:alnum:].-_]*)[[:space:]]*$ ]]; then
 		if [ ${BASH_REMATCH[1]} = ":" ]; then
 			if [ ${BASH_REMATCH[2]} ]; then
 				output=$(sqlite3 --separator " <--- " "$db_path" "SELECT * FROM links WHERE keyword = '${BASH_REMATCH[2]}'")
