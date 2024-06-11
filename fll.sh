@@ -73,7 +73,7 @@ else
 			echo "InvalidAssignment [line $counter]: '$line'"
 		fi
 
-	elif [[ $line =~ ^[[:space:]]*(.)[[:space:]]*([[:alnum:].-_]*)[[:space:]]*$ ]]; then
+	elif [[ $line =~ ^[[:space:]]*([:^])[[:space:]]*([[:alnum:].-_]*)[[:space:]]*$ ]]; then
 		if [ ${BASH_REMATCH[1]} = ":" ]; then
 			if [ ${BASH_REMATCH[2]} ]; then
 				output=$(sqlite3 --separator " <--- " "$db_path" "SELECT * FROM links WHERE keyword = '${BASH_REMATCH[2]}'")
@@ -106,16 +106,17 @@ else
 				unset output
 			fi
 
-		else
-			new_path=$(sqlite3 --separator " <--- " "$db_path" "SELECT path FROM links WHERE keyword = '${BASH_REMATCH[1]}${BASH_REMATCH[2]}'")
-			if [[ $new_path ]]; then
-				cd "$new_path"
-			else
-				echo "AliasNotFound: '${BASH_REMATCH[1]}${BASH_REMATCH[2]}'"
-				break
-			fi
-			unset new_path
 		fi
+
+	elif [[ $line =~ ^[[:space:]]*([[:alnum:].-_]*)[[:space:]]*$ ]]; then
+		new_path=$(sqlite3 --separator " <--- " "$db_path" "SELECT path FROM links WHERE keyword = '${BASH_REMATCH[1]}'")
+		if [[ $new_path ]]; then
+			cd "$new_path"
+		else
+			echo "AliasNotFound: '${BASH_REMATCH[1]}'"
+			break
+		fi
+		unset new_path
 
         else
 		echo "SyntaxError [line $counter]: $line"
