@@ -10,7 +10,7 @@ else
     setopt KSH_ARRAYS
 fi
 
-db_path="$(dirname "${BASH_SOURCE[0]:-${(%):-%x}}")/pathlinks.db"
+db_path="$(dirname "${BASH_SOURCE[0]:-${(%):-%x}}")/aliases.db"
 
     
 if [[ "${lines[*]}" =~ [[:space:]]*--reset[[:space:]]* ]]; then
