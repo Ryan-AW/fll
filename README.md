@@ -26,7 +26,7 @@ git clone https://github.com/Ryan-AW/fll ~/.fll
 ```
 then add this line to your ~/.bashrc file (or ~/.zshrc if you use Zsh):
 ``` console
-alias fll='source ~/.fll/fll/fll.sh'
+alias fll='source ~/.fll/fll.sh'
 ```
 
 
