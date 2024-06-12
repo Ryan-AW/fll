@@ -190,7 +190,7 @@ else
 			echo "SyntaxError [line $counter]: $line"
 		fi
 
-	elif [[ $line =~ ^[[:space:]]*print[[:space:]]*\+[[:space:]]*$ ]]; then
+	elif [[ $line =~ ^[[:space:]]*print[[:space:]]*[+][[:space:]]*$ ]]; then
 		output=$(sqlite3 --separator " <--- " "$db_path" "SELECT * FROM templates")
 
 		if [ "$output" ]; then
