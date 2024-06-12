@@ -15,7 +15,7 @@ db_path="$(dirname "${BASH_SOURCE[0]:-${(%):-%x}}")/aliases.db"
     
 if [[ "${lines[*]}" =~ [[:space:]]*--reset[[:space:]]* ]]; then
     rm "$db_path"
-    sqlite3 --separator " <--- " "$db_path" "CREATE TABLE links (keyword text, path text, unique(keyword));"
+    sqlite3 --separator " <--- " "$db_path" "CREATE TABLE aliases (keyword text, path text, unique(keyword));"
 elif [[ "${lines[*]}" =~ [[:space:]]*--help[[:space:]]* ]]; then
     echo "Usage: fll [OPTIONS | SCRIPT]"
     echo
@@ -53,22 +53,22 @@ else
 			break
 
 		elif [[ $line =~ ^[[:space:]]*([[:alnum:].-_]+)[[:space:]]*=[[:space:]]*$ ]]; then
-			sqlite3 --separator " <--- " "$db_path" "REPLACE INTO links VALUES ('${BASH_REMATCH[1]}', '$(pwd)')"
+			sqlite3 --separator " <--- " "$db_path" "REPLACE INTO aliases VALUES ('${BASH_REMATCH[1]}', '$(pwd)')"
 
 		elif [[ $line =~ ^[[:space:]]*([[:alnum:].-_]+)[[:space:]]*=[[:space:]]*:[[:space:]]*([[:alnum:].-_]+)[[:space:]]*$ ]]; then
-			output=$(sqlite3 --separator " <--- " "$db_path" "SELECT 1 FROM links WHERE keyword = '${BASH_REMATCH[2]}' LIMIT 1")
+			output=$(sqlite3 --separator " <--- " "$db_path" "SELECT 1 FROM aliases WHERE keyword = '${BASH_REMATCH[2]}' LIMIT 1")
 
 			if [ -z "$output" ]; then
 				echo "AliasNotFound: '${BASH_REMATCH[2]}'"
 				break
 			else
-				output=$(sqlite3 --separator " <--- " "$db_path" "REPLACE INTO links VALUES ('${BASH_REMATCH[1]}', (SELECT path FROM links WHERE keyword = '${BASH_REMATCH[2]}' LIMIT 1));")
+				output=$(sqlite3 --separator " <--- " "$db_path" "REPLACE INTO aliases VALUES ('${BASH_REMATCH[1]}', (SELECT path FROM aliases WHERE keyword = '${BASH_REMATCH[2]}' LIMIT 1));")
 			fi
 			unset output
 
 
 		elif [[ $line =~ ^[[:space:]]*([[:alnum:].-_]+)[[:space:]]*=[[:space:]]*([[:alnum:].-_]+)[[:space:]]*$ ]]; then
-			sqlite3 --separator " <--- " "$db_path" "REPLACE INTO links VALUES ('${BASH_REMATCH[1]}', '$(readlink -f "${BASH_REMATCH[2]}")')"
+			sqlite3 --separator " <--- " "$db_path" "REPLACE INTO aliases VALUES ('${BASH_REMATCH[1]}', '$(readlink -f "${BASH_REMATCH[2]}")')"
 		else
 			echo "InvalidAssignment [line $counter]: '$line'"
 		fi
@@ -76,9 +76,9 @@ else
 	elif [[ $line =~ ^[[:space:]]*([:^])[[:space:]]*([[:alnum:].-_]*)[[:space:]]*$ ]]; then
 		if [ ${BASH_REMATCH[1]} = ":" ]; then
 			if [ ${BASH_REMATCH[2]} ]; then
-				output=$(sqlite3 --separator " <--- " "$db_path" "SELECT * FROM links WHERE keyword = '${BASH_REMATCH[2]}'")
+				output=$(sqlite3 --separator " <--- " "$db_path" "SELECT * FROM aliases WHERE keyword = '${BASH_REMATCH[2]}'")
 			else
-				output=$(sqlite3 --separator " <--- " "$db_path" "SELECT * FROM links")
+				output=$(sqlite3 --separator " <--- " "$db_path" "SELECT * FROM aliases")
 			fi
 
 			if [ "$output" ]; then
@@ -91,14 +91,14 @@ else
 
 		elif [ ${BASH_REMATCH[1]} = "^" ]; then
 			if [ ${BASH_REMATCH[2]} ]; then
-				output=$(sqlite3 --separator " <--- " "$db_path" "SELECT 1 FROM links WHERE keyword = '${BASH_REMATCH[2]}'; DELETE FROM links WHERE keyword = '${BASH_REMATCH[2]}';")
+				output=$(sqlite3 --separator " <--- " "$db_path" "SELECT 1 FROM aliases WHERE keyword = '${BASH_REMATCH[2]}'; DELETE FROM aliases WHERE keyword = '${BASH_REMATCH[2]}';")
 				if [ -z "$output" ]; then
 					echo "AliasNotFound: '${BASH_REMATCH[2]}'"
 					break
 				fi
 				unset output
 			else
-				output=$(sqlite3 --separator " <--- " "$db_path" "SELECT 1 FROM links WHERE path = '$(pwd)'; DELETE FROM links WHERE path = '$(pwd)';")
+				output=$(sqlite3 --separator " <--- " "$db_path" "SELECT 1 FROM aliases WHERE path = '$(pwd)'; DELETE FROM aliases WHERE path = '$(pwd)';")
 				if [ -z "$output" ]; then
 					echo "AliasNotFound: No aliases set to current directory found"
 					break
@@ -109,7 +109,7 @@ else
 		fi
 
 	elif [[ $line =~ ^[[:space:]]*([[:alnum:].-_]*)[[:space:]]*$ ]]; then
-		new_path=$(sqlite3 --separator " <--- " "$db_path" "SELECT path FROM links WHERE keyword = '${BASH_REMATCH[1]}'")
+		new_path=$(sqlite3 --separator " <--- " "$db_path" "SELECT path FROM aliases WHERE keyword = '${BASH_REMATCH[1]}'")
 		if [[ $new_path ]]; then
 			cd "$new_path"
 		else
