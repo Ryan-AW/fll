@@ -66,7 +66,7 @@ else
 		:
 
         elif [[ $line == *"="* ]]; then
-		if [[ $(echo "$line" | grep -P '^.*[\^:].*=') ]]; then
+		if [[ $line =~ ^.*[:^].*= ]]; then
 			echo "InvalidAssignmentError [line $counter]: ':' and '^' are reserved keywords"
 			break
 
