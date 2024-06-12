@@ -12,10 +12,14 @@ fi
 
 db_path="$(dirname "${BASH_SOURCE[0]:-${(%):-%x}}")/aliases.db"
 
+script=""
+script_name=""
+
     
 if [[ "${lines[*]}" =~ [[:space:]]*--reset[[:space:]]* ]]; then
     rm "$db_path"
-    sqlite3 --separator " <--- " "$db_path" "CREATE TABLE aliases (keyword text, path text, unique(keyword));"
+    sqlite3 --separator " <--- " "$db_path" "CREATE TABLE aliases (keyword text, path text, unique(keyword)); CREATE TABLE templates (keyword text, script text, unique(keyword));"
+
 elif [[ "${lines[*]}" =~ [[:space:]]*--help[[:space:]]* ]]; then
     echo "Usage: fll [OPTIONS | SCRIPT]"
     echo
@@ -41,8 +45,9 @@ elif [[ "${lines[*]}" =~ [[:space:]]*--help[[:space:]]* ]]; then
 
 else
     counter=0
-    for line in "${lines[@]}"; do
-	counter=$((counter + 1))
+    while [ $counter -lt ${#lines[@]} ]; do
+	line="${lines[$counter]}"
+	((counter++))
 
         if [[ $line =~ ^[[:space:]]*$ ]]; then
 		:
@@ -77,16 +82,22 @@ else
 		if [ ${BASH_REMATCH[1]} = ":" ]; then
 			if [ ${BASH_REMATCH[2]} ]; then
 				output=$(sqlite3 --separator " <--- " "$db_path" "SELECT * FROM aliases WHERE keyword = '${BASH_REMATCH[2]}'")
+				if [ "$output" ]; then
+					echo "$output"
+				else
+					echo "AliasNotFound: '${BASH_REMATCH[2]}'"
+					break
+				fi
 			else
 				output=$(sqlite3 --separator " <--- " "$db_path" "SELECT * FROM aliases")
+				if [ "$output" ]; then
+					echo "$output"
+				else
+					echo "AliasNotFound: No aliases found"
+					break
+				fi
 			fi
 
-			if [ "$output" ]; then
-				echo "$output"
-			else
-				echo "AliasNotFound: No aliases found"
-				break
-			fi
 			unset output
 
 		elif [ ${BASH_REMATCH[1]} = "^" ]; then
@@ -118,10 +129,99 @@ else
 		fi
 		unset new_path
 
+	elif [[ $line =~ ^[[:space:]]*([[:alnum:].-_]*)[[:space:]]*([[:alnum:].-_]*)[[:space:]]*$ ]]; then
+		if [ ${BASH_REMATCH[1]} = "def" ]; then
+			if [ "$script_nanme" ]; then
+				echo "'$script_nanme' hasn't endend"
+				break
+			fi
+			script_name="${BASH_REMATCH[2]}"
+
+		elif [ ${BASH_REMATCH[1]} = "del" ]; then
+			output=$(sqlite3 --separator " <--- " "$db_path" "SELECT 1 FROM templates WHERE keyword = '${BASH_REMATCH[2]}'; DELETE FROM templates WHERE keyword = '${BASH_REMATCH[2]}';")
+			if [ -z "$output" ]; then
+				echo "TemplateNotFound: '${BASH_REMATCH[2]}'"
+				break
+			fi
+			unset output
+
+		elif [ ${BASH_REMATCH[1]} = "run" ]; then
+			output=$(sqlite3 --separator " <--- " "$db_path" "SELECT script FROM templates WHERE keyword = '${BASH_REMATCH[2]}'")
+
+			if [ "$output" ]; then
+				if [[ -z "$ZSH_VERSION" ]]; then
+				    IFS=',' read -ra template <<< "$output"
+				else
+				    IFS=',' read -rA template <<< "$output"
+				fi
+
+				if [[ $ZSH_VERSION ]]; then
+					lines=("${lines[@]:0:$((counter-1))}" "${template[@]}" "${lines[@]:$counter}")
+				else
+					lines=("${lines[@]:0:$counter}" "${template[@]}" "${lines[@]:$counter}")
+				fi
+
+				unset template
+			else
+				echo "TemplateNotFound: '${BASH_REMATCH[2]}'"
+				break
+			fi
+			unset output
+
+		elif [ ${BASH_REMATCH[1]} = "print" ]; then
+			output=$(sqlite3 --separator " <--- " "$db_path" "SELECT * FROM templates WHERE keyword = '${BASH_REMATCH[2]}'")
+
+			if [ "$output" ]; then
+				echo "$output"
+			else
+				echo "TemplateNotFound: '${BASH_REMATCH[2]}'"
+				break
+			fi
+			unset output
+
+		elif [ ${BASH_REMATCH[1]} = "end" ]; then
+			if [ ${BASH_REMATCH[2]} = "def" ]; then
+				if [ -z "$script_name" ]; then
+					echo "No starting def"
+					break
+				fi
+				sqlite3 --separator " <--- " "$db_path" "REPLACE INTO templates VALUES ('$script_name', '$script')"
+				script=""
+				script_name=""
+			else
+				echo "only 'def' can be ended, correct syntax is 'end def'"
+			fi
+		else
+			echo "SyntaxError [line $counter]: $line"
+		fi
+
+	elif [[ $line =~ ^[[:space:]]*print[[:space:]]*\+[[:space:]]*$ ]]; then
+		output=$(sqlite3 --separator " <--- " "$db_path" "SELECT * FROM templates")
+
+		if [ "$output" ]; then
+			echo "$output"
+		else
+			echo "TemplateNotFound: No templates found"
+			break
+		fi
+		unset output
+
+
         else
 		echo "SyntaxError [line $counter]: $line"
 		break
         fi
+
+	if [ "$script_name" ]; then
+		if [ "$script" = "," ]; then
+			script="$line"
+		elif [ "$script" ]; then
+			script="$script, $line"
+		else
+			script=","
+		fi
+	fi
+
     done
     
     unset counter
@@ -130,6 +230,8 @@ else
 fi
 
 unset db_path
+unset script
+unset script_name
 unset lines
 
 if [[ "$ZSH_VERSION" ]]; then
