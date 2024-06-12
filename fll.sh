@@ -29,19 +29,32 @@ elif [[ "${lines[*]}" =~ [[:space:]]*--help[[:space:]]* ]]; then
     echo
     echo "SCRIPT syntax"
     echo
+    echo "to run multiple commands in a row separate them with ','"
+    echo "e.g. fll home = /home/, :home"
+    echo
     echo "System commands:"
-    echo "        ':'     show all aliases"
-    echo "        '^'     delete all aliases that link to the current directory"
+    echo "	':'     show all aliases"
+    echo "	'^'     delete all aliases that link to the current directory"
     echo
     echo "Alias assignment:"
-    echo "        'alias_name = '                         sets an alias to the current path"
-    echo "        'alias_name = directory_path'           sets an alias to the specified path"
-    echo "        'new_alias_name = :existing_alias_name' sets an alias to the value of an already existing alias"
+    echo "	'alias_name = '                         sets an alias to the current path"
+    echo "	'alias_name = directory_path'           sets an alias to the specified path"
+    echo "	'new_alias_name = :existing_alias_name' sets an alias to the value of an already existing alias"
     echo
     echo "Statements:"
-    echo "        'alias_name'    changes directory using the alias"
-    echo "        ':alias_name'   shows what the specified alias is"
-    echo "        '^alias_name'   removes specified alias"
+    echo "	'alias_name'    changes directory using the alias"
+    echo "	':alias_name'   shows what the specified alias is"
+    echo "	'^alias_name'   removes specified alias"
+    echo
+    echo "Templates:"
+    echo "	'def <template_name>'		starts recording template"
+    echo "	'end def'			stop recording template and saves it"
+    echo "	'run <template_name>'		execute the specified template"
+    echo
+    echo "	'del <template_names>'		deletes specified template"
+    echo "	'print <template_names>'	displays specified template"
+    echo "	'print +'			displays all templates"
+
 
 else
     counter=0
