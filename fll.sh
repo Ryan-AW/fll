@@ -155,12 +155,7 @@ else
 				    IFS=',' read -rA template <<< "$output"
 				fi
 
-				if [[ $ZSH_VERSION ]]; then
-					lines=("${lines[@]:0:$((counter-1))}" "${template[@]}" "${lines[@]:$counter}")
-				else
-					lines=("${lines[@]:0:$counter}" "${template[@]}" "${lines[@]:$counter}")
-				fi
-
+				lines=("${lines[@]:0:$counter}" "${template[@]}" "${lines[@]:$counter}")
 				unset template
 			else
 				echo "TemplateNotFound: '${BASH_REMATCH[2]}'"
