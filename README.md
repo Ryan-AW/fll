@@ -22,12 +22,14 @@ sudo apt install sqlite3
 
 ## Install
 ``` console
-git clone https://github.com/Ryan-AW/fll ~/.fll
+git clone https://github.com/Ryan-AW/fll ~/fll
 ```
 then add this line to your ~/.bashrc file (or ~/.zshrc if you use Zsh):
 ``` console
-alias fll='source ~/.fll/fll.sh'
+alias fll='source ~/fll/fll.sh'
 ```
+**warning**
+Ensure that the path points to where you cloned the repository.
 
 To use fll in your current terminal session run this:
 ``` console
