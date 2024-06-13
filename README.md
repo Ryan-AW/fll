@@ -28,14 +28,10 @@ then add this line to your ~/.bashrc file (or ~/.zshrc if you use Zsh):
 ``` console
 alias fll='source ~/fll/fll.sh'
 ```
-**warning**
+**important**
 Ensure that the path points to where you cloned the repository.
 
-To use fll in your current terminal session run this:
-``` console
-[ -n "$ZSH_VERSION" ] && source ~/.zshrc || source ~/.bashrc
-```
-
+(Note: You may need to restart your terminal or run source `~/.bashrc` (or source `~/.zshrc` if you use Zsh) for the changes to take effect.)
 
 **warning**
-This program must be run as a source file otherwise it will not be able to change the user's directory.
+This program must be run as a source file otherwise it will not work.
