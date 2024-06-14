@@ -64,6 +64,18 @@ _db_get_path() {
 		return 1
 	fi
 }
+_db_set_alias() {
+	# takes in the alias and a path
+	# returns 1 if error
+
+	if [[ "$1" =~ ^[[:alnum:].-_]*$ ]]; then
+		sqlite3 "$db_path" "REPLACE INTO aliases VALUES ('$1', '$2')" && return 0
+		return 1
+	fi
+	echo "'$1' is not a valid name for an alias"
+	return 1
+}
+
 
 _goto_alias() {
 	# takes in the alias
@@ -132,13 +144,13 @@ _handle_aliases() {
 	# 2 if success but the program should halt
 
 	if [[ "$2" ]]; then
-		echo "set $1 to $2"
-		return 2
+		_db_set_alias "$1" "$2" && return 2
+		return "$?"
 	fi
 
 	if [[ "$1" ]]; then
-		_goto_alias "$1"
-		return 2
+		_goto_alias "$1" && return 2
+		return "$?"
 	fi
 }
 
