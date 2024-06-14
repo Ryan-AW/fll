@@ -65,20 +65,20 @@ _help() {
 	# 2 if success but the program should halt
 
 	if [[ "$@" =~ (-h|--help) ]]; then
-		echo "this is the help page"
+		echo "help menu not written yet"
 		return 2
 	fi
 }
-_show() {
+_print() {
 	# takes in the first two arguments
 	# returns:
 	# 0 to continue
 	# 1 if error
 	# 2 if success but the program should halt
 	
-	if [[ "$1" == "--show" || "$1" == "-s" ]]; then
-		if [[ "$2" == "--show" || "$2" == "-s" ]]; then
-			echo "Error: you can only use the --show/-s flag once"
+	if [[ "$1" == "--print" || "$1" == "-p" ]]; then
+		if [[ "$2" == "--print" || "$2" == "-p" ]]; then
+			echo "Error: you can only use the --print/-p flag once"
 			return 1
 		elif [[ "$2" ]]; then
 			_db_get_path "$2" && echo "$output" && return 2
@@ -87,12 +87,12 @@ _show() {
 			_db_get_all && echo "$output" && return 2
 			return 1
 		fi
-	elif [[ "$2" == "--show" || "$2" == "-s" ]]; then
+	elif [[ "$2" == "--print" || "$2" == "-p" ]]; then
 		_db_get_path "$1" && echo "$output" && return 2
 		return 1
 	fi
 }
 
 _help "$@" &&
-_show "$1" "$2"
+_print "$1" "$2"
 echo "return code '$?'"
