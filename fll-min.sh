@@ -107,7 +107,26 @@ _help() {
 	# 2 if success but the program should halt
 	for arg in "$@"; do
 		if [ "$arg" = "-h" -o "$arg" = "--help" ]; then
-			echo "help menu not written yet"
+			echo 'Usage: fll [options] <alias> <path>'
+			echo 'Or usage: fll --script/-s [fll SCRIPT ...]'
+			echo
+			echo 'Options:'
+			echo '  -h, --help     Show this help menu'
+			echo '  -p, --print    Print the alias configuration'
+			echo '  -r, --remove   Remove the alias configuration'
+			echo '  -s, --script   Interpret all following commands as FLL script (must be first argument)'
+			echo
+			echo 'Arguments:'
+			echo '  alias          The alias to manage (required unless using --script)'
+			echo '  path           The path to set for the alias (optional)'
+			echo
+			echo 'Examples:'
+			echo '  fll -h          Show this help menu'
+			echo '  fll myalias     Change Directory using "myalias" alias'
+			echo '  fll -p myalias  Print the path for "myalias"'
+			echo '  fll -r myalias  Unassigns "myalias"'
+			echo '  fll myalias /path/to/save  Set the path for "myalias" to "/path/to/save"'
+			echo '  fll -s          Enter FLL scripting mode (all following commands will be interpreted as FLL)'
 			return 2
 		fi
 	done
