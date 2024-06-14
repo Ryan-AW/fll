@@ -15,19 +15,19 @@ _fll_min_completion() {
 
 	if [ $COMP_CWORD -eq 1 ]; then
 		completions=$(sqlite3 "$db_path" "SELECT keyword FROM aliases")
-		COMPREPLY=( $(compgen -W "$completions --help --print --script" -- $cur) )
+		COMPREPLY=( $(compgen -W "$completions --help --print --remove --script" -- $cur) )
 	fi
 
 	if [ $COMP_CWORD -eq 2 ]; then
 		case "$prev" in
 			--help|-h);;
-			--print|-p)
+			--print|-p|--remove|-r)
 				completions=$(sqlite3 "$db_path" "SELECT keyword FROM aliases")
 				COMPREPLY=( $(compgen -W "$completions" -- $cur) );;
 			--script|-l)
 				COMPREPLY=( $(compgen -f -- $cur) );;
 			*)
-			COMPREPLY=( $(compgen -W "$(compgen -f -- $cur) --print" -- $cur) );;
+			COMPREPLY=( $(compgen -W "$(compgen -f -- $cur) --print --remove" -- $cur) );;
 		esac
 	fi
 	return 0
@@ -74,6 +74,16 @@ _db_set_alias() {
 	fi
 	echo "'$1' is not a valid name for an alias"
 	return 1
+}
+_db_remove_alias() {
+	# takes in the alias
+	# returns 1 if error
+
+	local test_if_exists
+	test_if_exists=$(sqlite3 --separator " <--- " "$db_path" "SELECT 1 FROM aliases WHERE keyword = '$1'; DELETE FROM aliases WHERE keyword= '$1';")
+	if [ -z "$test_if_exists" ]; then
+		echo "AliasNotFound: '$1'"
+	fi
 }
 
 
@@ -136,6 +146,29 @@ _print() {
 		return 1
 	fi
 }
+_remove() {
+	# takes in the first two arguments
+	# returns:
+	# 0 to continue
+	# 1 if error
+	# 2 if success but the program should halt
+	
+	if [[ "$1" == "--remove" || "$1" == "-r" ]]; then
+		if [[ "$2" == "--remove" || "$2" == "-r" ]]; then
+			echo "Error: you can only use the --remove/-r flag once"
+			return 1
+		elif [[ "$2" ]]; then
+			_db_remove_alias "$2" && return 2
+			return 1
+		else
+			echo "you must specify the alias to remove"
+			return 1
+		fi
+	elif [[ "$2" == "--remove" || "$2" == "-r" ]]; then
+		_db_remove_alias "$1" && return 2
+		return 1
+	fi
+}
 _handle_aliases() {
 	# takes in the first two arguments
 	# returns:
@@ -159,5 +192,6 @@ _handle_aliases() {
 _help "$@" &&
 _script "$1" &&
 _print "$1" "$2" &&
+_remove "$1" "$2" &&
 _handle_aliases "$1" "$2"
 echo "return code '$?'"
