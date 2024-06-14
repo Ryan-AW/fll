@@ -5,24 +5,35 @@ output=""
 
 
 
+
 _fll_min_completion() {
-	local cur prev completions
+	local cur prev completions mode
 	COMPREPLY=()
 	cur="${COMP_WORDS[COMP_CWORD]}"
 	prev="${COMP_WORDS[COMP_CWORD-1]}"
 
+
 	if [ $COMP_CWORD -eq 1 ]; then
 		completions=$(sqlite3 "$db_path" "SELECT keyword FROM aliases")
-		COMPREPLY=( $(compgen -W "$completions" -- $cur) )
+		COMPREPLY=( $(compgen -W "$completions --help --print --script" -- $cur) )
 	fi
 
 	if [ $COMP_CWORD -eq 2 ]; then
-		COMPREPLY=( $(compgen -f -- $cur) )
+		case "$prev" in
+			--help|-h);;
+			--print|-p)
+				completions=$(sqlite3 "$db_path" "SELECT keyword FROM aliases")
+				COMPREPLY=( $(compgen -W "$completions" -- $cur) );;
+			--script|-l)
+				COMPREPLY=( $(compgen -f -- $cur) );;
+			*)
+			COMPREPLY=( $(compgen -W "$(compgen -f -- $cur) --print" -- $cur) );;
+		esac
 	fi
-
 	return 0
 }
 complete -F _fll_min_completion fll
+
 
 
 _db_get_all() {
@@ -63,11 +74,12 @@ _help() {
 	# returns:
 	# 0 to continue
 	# 2 if success but the program should halt
-
-	if [[ "$@" =~ (-h|--help) ]]; then
-		echo "help menu not written yet"
-		return 2
-	fi
+	for arg in "$@"; do
+		if [ "$arg" = "-h" -o "$arg" = "--help" ]; then
+			echo "help menu not written yet"
+			return 2
+		fi
+	done
 }
 _script() {
 	# takes in the first argument
@@ -103,6 +115,8 @@ _print() {
 		return 1
 	fi
 }
+
+
 
 _help "$@" &&
 _script "$1" &&
