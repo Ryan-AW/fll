@@ -36,7 +36,7 @@ complete -F _fll_min_completion fll
 
 
 
-_db_get_all() {
+_db_dump() {
 	# takes in nothing
 	# sets output = list of (keyword, path)
 	# returns 1 if table is empty
@@ -51,9 +51,9 @@ _db_get_all() {
 	fi
 }
 _db_get_path() {
-	# takes in the keyword
-	# sets output = path of keyword
-	# returns 1 if keyword not found
+	# takes in the alias
+	# sets output = path of alias
+	# returns 1 if alias not found
 
 	local new_path
 	new_path=$(sqlite3 "$db_path" "SELECT path FROM aliases WHERE keyword = '$1'")
@@ -63,6 +63,15 @@ _db_get_path() {
 		echo "AliasNotFound: '$1'"
 		return 1
 	fi
+}
+
+_goto_alias() {
+	# takes in the alias
+	# sets output = path of alias
+	# returns 1 if error
+
+	_db_get_path "$1" && cd "$output"
+	return "$?"
 }
 
 
@@ -107,7 +116,7 @@ _print() {
 			_db_get_path "$2" && echo "$output" && return 2
 			return 1
 		else
-			_db_get_all && echo "$output" && return 2
+			_db_dump && echo "$output" && return 2
 			return 1
 		fi
 	elif [[ "$2" == "--print" || "$2" == "-p" ]]; then
@@ -115,10 +124,28 @@ _print() {
 		return 1
 	fi
 }
+_handle_aliases() {
+	# takes in the first two arguments
+	# returns:
+	# 0 to continue
+	# 1 if error
+	# 2 if success but the program should halt
+
+	if [[ "$2" ]]; then
+		echo "set $1 to $2"
+		return 2
+	fi
+
+	if [[ "$1" ]]; then
+		_goto_alias "$1"
+		return 2
+	fi
+}
 
 
 
 _help "$@" &&
 _script "$1" &&
-_print "$1" "$2"
+_print "$1" "$2" &&
+_handle_aliases "$1" "$2"
 echo "return code '$?'"
