@@ -58,7 +58,7 @@ elif [[ "${lines[*]}" =~ [[:space:]]*--help[[:space:]]* ]]; then
 
 else
     counter=0
-    while [ $counter -lt ${#lines[@]} ]; do
+    while [[ $counter -lt ${#lines[@]} ]]; do
 	line="${lines[$counter]}"
 	((counter++))
 
@@ -76,7 +76,7 @@ else
 		elif [[ $line =~ ^[[:space:]]*([[:alnum:].-_]+)[[:space:]]*=[[:space:]]*:[[:space:]]*([[:alnum:].-_]+)[[:space:]]*$ ]]; then
 			output=$(sqlite3 --separator " <--- " "$db_path" "SELECT 1 FROM aliases WHERE keyword = '${BASH_REMATCH[2]}' LIMIT 1")
 
-			if [ -z "$output" ]; then
+			if [[ -z "$output" ]]; then
 				echo "AliasNotFound: '${BASH_REMATCH[2]}'"
 				break
 			else
@@ -92,10 +92,10 @@ else
 		fi
 
 	elif [[ $line =~ ^[[:space:]]*([:^])[[:space:]]*([[:alnum:].-_]*)[[:space:]]*$ ]]; then
-		if [ "${BASH_REMATCH[1]}" = ":" ]; then
-			if [ "${BASH_REMATCH[2]}" ]; then
+		if [[ "${BASH_REMATCH[1]}" = ":" ]]; then
+			if [[ "${BASH_REMATCH[2]}" ]]; then
 				output=$(sqlite3 --separator " <--- " "$db_path" "SELECT * FROM aliases WHERE keyword = '${BASH_REMATCH[2]}'")
-				if [ "$output" ]; then
+				if [[ "$output" ]]; then
 					echo "$output"
 				else
 					echo "AliasNotFound: '${BASH_REMATCH[2]}'"
@@ -103,7 +103,7 @@ else
 				fi
 			else
 				output=$(sqlite3 --separator " <--- " "$db_path" "SELECT * FROM aliases")
-				if [ "$output" ]; then
+				if [[ "$output" ]]; then
 					echo "$output"
 				else
 					echo "AliasNotFound: No aliases found"
@@ -113,17 +113,17 @@ else
 
 			unset output
 
-		elif [ "${BASH_REMATCH[1]}" = "^" ]; then
-			if [ "${BASH_REMATCH[2]}" ]; then
+		elif [[ "${BASH_REMATCH[1]}" = "^" ]]; then
+			if [[ "${BASH_REMATCH[2]}" ]]; then
 				output=$(sqlite3 --separator " <--- " "$db_path" "SELECT 1 FROM aliases WHERE keyword = '${BASH_REMATCH[2]}'; DELETE FROM aliases WHERE keyword = '${BASH_REMATCH[2]}';")
-				if [ -z "$output" ]; then
+				if [[ -z "$output" ]]; then
 					echo "AliasNotFound: '${BASH_REMATCH[2]}'"
 					break
 				fi
 				unset output
 			else
 				output=$(sqlite3 --separator " <--- " "$db_path" "SELECT 1 FROM aliases WHERE path = '$(pwd)'; DELETE FROM aliases WHERE path = '$(pwd)';")
-				if [ -z "$output" ]; then
+				if [[ -z "$output" ]]; then
 					echo "AliasNotFound: No aliases set to current directory found"
 					break
 				fi
@@ -143,25 +143,25 @@ else
 		unset new_path
 
 	elif [[ $line =~ ^[[:space:]]*([[:alnum:].-_]*)[[:space:]]*([[:alnum:].-_]*)[[:space:]]*$ ]]; then
-		if [ "${BASH_REMATCH[1]}" = "def" ]; then
-			if [ "$script_nanme" ]; then
+		if [[ "${BASH_REMATCH[1]}" = "def" ]]; then
+			if [[ "$script_nanme" ]]; then
 				echo "'$script_nanme' hasn't endend"
 				break
 			fi
 			script_name="${BASH_REMATCH[2]}"
 
-		elif [ "${BASH_REMATCH[1]}" = "del" ]; then
+		elif [[ "${BASH_REMATCH[1]}" = "del" ]]; then
 			output=$(sqlite3 --separator " <--- " "$db_path" "SELECT 1 FROM templates WHERE keyword = '${BASH_REMATCH[2]}'; DELETE FROM templates WHERE keyword = '${BASH_REMATCH[2]}';")
-			if [ -z "$output" ]; then
+			if [[ -z "$output" ]]; then
 				echo "TemplateNotFound: '${BASH_REMATCH[2]}'"
 				break
 			fi
 			unset output
 
-		elif [ "${BASH_REMATCH[1]}" = "run" ]; then
+		elif [[ "${BASH_REMATCH[1]}" = "run" ]]; then
 			output=$(sqlite3 --separator " <--- " "$db_path" "SELECT script FROM templates WHERE keyword = '${BASH_REMATCH[2]}'")
 
-			if [ "$output" ]; then
+			if [[ "$output" ]]; then
 				if [[ -z "$ZSH_VERSION" ]]; then
 				    IFS=',' read -ra template <<< "$output"
 				else
@@ -176,10 +176,10 @@ else
 			fi
 			unset output
 
-		elif [ "${BASH_REMATCH[1]}" = "print" ]; then
+		elif [[ "${BASH_REMATCH[1]}" = "print" ]]; then
 			output=$(sqlite3 --separator " <--- " "$db_path" "SELECT * FROM templates WHERE keyword = '${BASH_REMATCH[2]}'")
 
-			if [ "$output" ]; then
+			if [[ "$output" ]]; then
 				echo "$output"
 			else
 				echo "TemplateNotFound: '${BASH_REMATCH[2]}'"
@@ -187,9 +187,9 @@ else
 			fi
 			unset output
 
-		elif [ "${BASH_REMATCH[1]}" = "end" ]; then
-			if [ "${BASH_REMATCH[2]}" = "def" ]; then
-				if [ -z "$script_name" ]; then
+		elif [[ "${BASH_REMATCH[1]}" = "end" ]]; then
+			if [[ "${BASH_REMATCH[2]}" = "def" ]]; then
+				if [[ -z "$script_name" ]]; then
 					echo "No starting def"
 					break
 				fi
@@ -206,7 +206,7 @@ else
 	elif [[ $line =~ ^[[:space:]]*print[[:space:]]*[+][[:space:]]*$ ]]; then
 		output=$(sqlite3 --separator " <--- " "$db_path" "SELECT * FROM templates")
 
-		if [ "$output" ]; then
+		if [[ "$output" ]]; then
 			echo "$output"
 		else
 			echo "TemplateNotFound: No templates found"
@@ -220,10 +220,10 @@ else
 		break
         fi
 
-	if [ "$script_name" ]; then
-		if [ "$script" = "," ]; then
+	if [[ "$script_name" ]]; then
+		if [[ "$script" = "," ]]; then
 			script="$line"
-		elif [ "$script" ]; then
+		elif [[ "$script" ]]; then
 			script="$script, $line"
 		else
 			script=","
