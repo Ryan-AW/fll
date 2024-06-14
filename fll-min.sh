@@ -69,6 +69,17 @@ _help() {
 		return 2
 	fi
 }
+_script() {
+	# takes in the first argument
+	# returns:
+	# 0 to continue
+	# 3 if success
+
+	if [[ "$1" =~ (-s|--script) ]]; then
+		echo "it will pass in a script"
+		return 3
+	fi
+}
 _print() {
 	# takes in the first two arguments
 	# returns:
@@ -94,5 +105,6 @@ _print() {
 }
 
 _help "$@" &&
+_script "$1" &&
 _print "$1" "$2"
 echo "return code '$?'"
