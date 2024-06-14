@@ -69,7 +69,7 @@ _db_set_alias() {
 	# returns 1 if error
 
 	if [[ "$1" =~ ^[[:alnum:].-_]*$ ]]; then
-		sqlite3 "$db_path" "REPLACE INTO aliases VALUES ('$1', '$2')" && return 0
+		sqlite3 "$db_path" "REPLACE INTO aliases VALUES ('$1', '$(readlink -f "$2")')" && return 0
 		return 1
 	fi
 	echo "'$1' is not a valid name for an alias"
