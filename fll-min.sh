@@ -55,12 +55,27 @@ _db_get_path() {
 }
 
 
+
+
+
+_help() {
+	# takes in all arguments
+	# returns:
+	# 0 to continue
+	# 2 if success but the program should halt
+
+	if [[ "$@" =~ (-h|--help) ]]; then
+		echo "this is the help page"
+		return 2
+	fi
+}
 _show() {
 	# takes in the first two arguments
 	# returns:
 	# 0 to continue
 	# 1 if error
 	# 2 if success but the program should halt
+	
 	if [[ "$1" == "--show" || "$1" == "-s" ]]; then
 		if [[ "$2" == "--show" || "$2" == "-s" ]]; then
 			echo "Error: you can only use the --show/-s flag once"
@@ -78,5 +93,6 @@ _show() {
 	fi
 }
 
+_help "$@" &&
 _show "$1" "$2"
 echo "return code '$?'"
