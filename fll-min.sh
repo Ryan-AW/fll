@@ -219,8 +219,8 @@ _help() {
 			echo
 			echo 'Options:'
 			echo '  -h, --help     Show this help menu'
-			echo '  -p, --print    Print the alias configuration'
-			echo '  -r, --remove   Remove the alias configuration'
+			echo '  -p, --print    Print the alias'
+			echo '  -r, --remove   Remove the alias'
 			echo '  -s, --script   Interpret all following commands as FLL script (must be first argument)'
 			echo
 			echo 'Arguments:'
@@ -231,6 +231,7 @@ _help() {
 			echo '  fll -h          Show this help menu'
 			echo '  fll myalias     Change Directory using "myalias" alias'
 			echo '  fll -p myalias  Print the path for "myalias"'
+			echo '  fll -r          Unassigns all aliases that point to the current working directory'
 			echo '  fll -r myalias  Unassigns "myalias"'
 			echo '  fll myalias /path/to/save  Set the path for "myalias" to "/path/to/save"'
 			echo '  fll -s          Enter FLL scripting mode (all following commands will be interpreted as FLL)'
@@ -309,7 +310,7 @@ _remove() {
 			_db_remove_alias "$2" && return 2
 			return 1
 		else
-			echo "you must specify the alias to remove"
+			_db_remove_cwd && echo "$output" && return 2
 			return 1
 		fi
 	elif [[ "$2" == "--remove" || "$2" == "-r" ]]; then
