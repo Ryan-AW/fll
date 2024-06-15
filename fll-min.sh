@@ -132,13 +132,26 @@ _help() {
 	done
 }
 _script() {
-	# takes in the first argument
+	# takes in the all arguments
 	# returns:
 	# 0 to continue
 	# 3 if success
 
+	local lines counter line
 	if [[ "$1" =~ (-s|--script) ]]; then
-		echo "it will pass in a script"
+		shift
+		if [[ -z "$ZSH_VERSION" ]]; then
+			IFS=',' read -ra lines <<< "$*"
+		else
+			IFS=',' read -rA lines <<< "$*"
+		fi
+
+		counter=0
+		while [ $counter -lt ${#lines[@]} ]; do
+			line="${lines[$counter]}"
+			((counter++))
+			echo "$line"
+		done
 		return 3
 	fi
 }
@@ -209,7 +222,7 @@ _handle_aliases() {
 
 
 _help "$@" &&
-_script "$1" &&
+_script "$@" &&
 _print "$1" "$2" &&
 _remove "$1" "$2" &&
 _handle_aliases "$1" "$2"
