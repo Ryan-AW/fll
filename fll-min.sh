@@ -300,6 +300,13 @@ _script_template() {
 }
 
 
+_script_invalid_syntax() {
+	# takes in one line of script and the line number
+	# returns 1
+
+	echo "SyntaxError"
+	return 1
+}
 
 
 
@@ -371,7 +378,8 @@ _script() {
 			_script_print "$line" "$counter" &&
 			_script_remove "$line" &&
 			_script_alias "$line" &&
-			_script_template "$line" "$counter"
+			_script_template "$line" "$counter" &&
+			_script_invalid_syntax "$line" "$counter"
 
 			if [ "$script_name" ]; then
 				if [ "$script" = "," ]; then
@@ -465,8 +473,6 @@ _script "$@" &&
 _print "$1" "$2" &&
 _remove "$1" "$2" &&
 _handle_aliases "$1" "$2"
-
-echo "return code '$?'"
 
 if [[ "$ZSH_VERSION" ]]; then
 	unsetopt BASH_REMATCH
