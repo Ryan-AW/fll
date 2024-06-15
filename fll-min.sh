@@ -2,6 +2,8 @@
 
 db_path="$(dirname "${BASH_SOURCE[0]:-${(%):-%x}}")/aliases.db"
 output=""
+script_name=""
+script=""
 
 
 
@@ -109,6 +111,58 @@ _goto_alias() {
 
 
 
+_get_template() {
+	# takes in the template name and line count
+	# sets output = template content
+	# returns 1 if error
+
+	output=$(sqlite3 "$db_path" "SELECT script FROM templates WHERE keyword = '$1'")
+
+	if [ "$output" ]; then
+		if [[ -z "$ZSH_VERSION" ]]; then
+		    IFS=',' read -ra template <<< "$output"
+		else
+		    IFS=',' read -rA template <<< "$output"
+		fi
+
+		lines=("${lines[@]:0:$2}" "${template[@]}" "${lines[@]:$2}")
+	else
+		echo "TemplateNotFound: '${BASH_REMATCH[2]}'"
+		return 1
+	fi
+}
+
+_del_template() {
+	# takes in the template name
+	# returns 1 if error
+
+	local test_if_exists
+	test_if_exists=$(sqlite3 "$db_path" "SELECT 1 FROM templates WHERE keyword = '$1'; DELETE FROM templates WHERE keyword = '$1';")
+
+	if [ -z "$test_if_exists" ]; then
+		echo "TemplateNotFound: '$1'"
+		return 1
+	fi
+}
+_print_template() {
+	# takes in the template name
+	# sets output = the script
+	# returns 1 if error
+
+	output=$(sqlite3 "$db_path" "SELECT script FROM templates WHERE keyword = '$1'")
+
+	if [ -z "$output" ]; then
+		echo "TemplateNotFound: '$1'"
+		return 1
+	fi
+}
+
+
+
+
+
+
+
 
 _script_blank_line() {
 	# takes in one line of script
@@ -202,6 +256,49 @@ _script_alias() {
 	fi
 }
 
+_script_template() {
+	# takes in one line of script and the line number
+	# returns:
+	# 0 to continue script
+	# 1 if error
+	# 2 to continue to next line
+
+	if [[ $line =~ ^[[:space:]]*([[:alnum:].-_]*)[[:space:]]*([[:alnum:].-_]*)[[:space:]]*$ ]]; then
+		if [ ${BASH_REMATCH[1]} = "def" ]; then
+			script_name="${BASH_REMATCH[2]}"
+			script=""
+
+                elif [ ${BASH_REMATCH[1]} = "del" ]; then
+			_del_template "${BASH_REMATCH[2]}" && return 2
+			return 1
+
+                elif [ ${BASH_REMATCH[1]} = "run" ]; then
+			_get_template "${BASH_REMATCH[2]}" "$2" && return 2
+			return 1
+
+                elif [ ${BASH_REMATCH[1]} = "print" ]; then
+			_print_template "${BASH_REMATCH[2]}" && return 2
+			return 1
+
+                elif [ ${BASH_REMATCH[1]} = "end" ]; then
+                        if [ ${BASH_REMATCH[2]} = "def" ]; then
+                                if [ -z "$script_name" ]; then
+                                        echo "No starting def"
+					return 1
+				else
+					sqlite3 --separator " <--- " "$db_path" "REPLACE INTO templates VALUES ('$script_name', '$script')"
+					script=""
+					script_name=""
+				fi
+                        else
+                                echo "only 'def' can be ended, correct syntax is 'end def'"
+                        fi
+                else
+                        echo "SyntaxError [line $counter]: $line"
+                fi
+	fi
+}
+
 
 
 
@@ -273,7 +370,18 @@ _script() {
 			_script_assignment "$line" "$counter" &&
 			_script_print "$line" "$counter" &&
 			_script_remove "$line" &&
-			_script_alias "$line"
+			_script_alias "$line" &&
+			_script_template "$line" "$counter"
+
+			if [ "$script_name" ]; then
+				if [ "$script" = "," ]; then
+					script="$line"
+				elif [ "$script" ]; then
+					script="$script, $line"
+				else
+					script=","
+				fi
+			fi
 
 			if [[ "$?" == 1 ]]; then
 				return 1
