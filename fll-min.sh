@@ -100,6 +100,87 @@ _goto_alias() {
 
 
 
+
+
+
+_script_blank_line() {
+	# takes in one line of script
+	# returns:
+	# 0 to continue script
+	# 1 if error
+	# 2 to continue to next line
+
+	if [[ "$1" =~ ^[[:space:]]*$ ]]; then
+		echo "empty line"
+	fi
+}
+
+_script_assignment() {
+	# takes in one line of script and the line number
+	# returns:
+	# 0 to continue script
+	# 1 if error
+	# 2 to continue to next line
+
+	if [[ "$1" == *"="* ]]; then
+		if [[ "$1" =~ ^.*[:^].*= ]]; then
+			echo "InvalidAssignmentError [line $2]: ':' and '^' are reserved keywords"
+			return 1
+
+		elif [[ "$1" =~ ^[[:space:]]*([[:alnum:].-_]+)[[:space:]]*=[[:space:]]*$ ]]; then
+			echo "pwd assignment"
+			return 2
+
+		elif [[ "$1" =~ ^[[:space:]]*([[:alnum:].-_]+)[[:space:]]*=[[:space:]]*:[[:space:]]*([[:alnum:].-_]+)[[:space:]]*$ ]]; then
+			echo "itervariable assignment"
+			return 2
+
+
+		elif [[ "$1" =~ ^[[:space:]]*([[:alnum:].-_]+)[[:space:]]*=[[:space:]]*([[:alnum:].-_]+)[[:space:]]*$ ]]; then
+			echo "simple assignment"
+			return 2
+		else
+			echo "InvalidAssignment [line $2]: '$1'"
+			return 1
+		fi
+	fi
+}
+
+_script_print() {
+	# takes in one line of script and the line number
+	# returns:
+	# 0 to continue script
+	# 1 if error
+	# 2 to continue to next line
+
+        if [[ "$1" =~ ^[[:space:]]*:[[:space:]]*([[:alnum:].-_]*)[[:space:]]*$ ]]; then
+		if [ ${BASH_REMATCH[1]} ]; then
+			_db_get_path "${BASH_REMATCH[1]}" && echo "$output" && return 2
+		else
+			_db_dump && echo "$output" && return 2
+			return 1
+		fi
+	fi
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 _help() {
 	# takes in all arguments
 	# returns:
@@ -135,7 +216,8 @@ _script() {
 	# takes in the all arguments
 	# returns:
 	# 0 to continue
-	# 3 if success
+	# 1 if error
+	# 2 if success but the program should halt
 
 	local lines counter line
 	if [[ "$1" =~ (-s|--script) ]]; then
@@ -150,9 +232,16 @@ _script() {
 		while [ $counter -lt ${#lines[@]} ]; do
 			line="${lines[$counter]}"
 			((counter++))
-			echo "$line"
+
+			_script_blank_line "$line" &&
+			_script_assignment "$line" "$counter" &&
+			_script_print "$line" "$counter"
+
+			if [[ "$?" == 1 ]]; then
+				return "$?"
+			fi
 		done
-		return 3
+		return 2
 	fi
 }
 _print() {
@@ -221,9 +310,18 @@ _handle_aliases() {
 
 
 
+if [[ "$ZSH_VERSION" ]]; then
+	setopt BASH_REMATCH
+fi
+
 _help "$@" &&
 _script "$@" &&
 _print "$1" "$2" &&
 _remove "$1" "$2" &&
 _handle_aliases "$1" "$2"
+
 echo "return code '$?'"
+
+if [[ "$ZSH_VERSION" ]]; then
+	unsetopt BASH_REMATCH
+fi
