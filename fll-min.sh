@@ -94,8 +94,6 @@ _db_remove_cwd() {
 		echo "AliasNotFound: No aliases set to current directory found"
 	fi
 }
-
-
 _goto_alias() {
 	# takes in the alias
 	# sets output = path of alias
@@ -181,7 +179,6 @@ _script_remove() {
 	# 2 to continue to next line
 
         if [[ "$1" =~ ^[[:space:]]*\^[[:space:]]*([[:alnum:].-_]*)[[:space:]]*$ ]]; then
-		echo "remove"
 		if [[ ${BASH_REMATCH[1]} ]]; then
 			_db_remove_alias "${BASH_REMATCH[1]}" && echo "$output" && return 2
 		else
@@ -192,6 +189,18 @@ _script_remove() {
 }
 
 
+_script_alias() {
+	# takes in one line of script
+	# returns:
+	# 0 to continue script
+	# 1 if error
+	# 2 to continue to next line
+
+        if [[ "$1" =~ ^[[:space:]]*([[:alnum:].-_]*)[[:space:]]*$ ]]; then
+		_goto_alias "${BASH_REMATCH[1]}" && return 2
+		return 1
+	fi
+}
 
 
 
@@ -263,7 +272,8 @@ _script() {
 			_script_blank_line "$line" &&
 			_script_assignment "$line" "$counter" &&
 			_script_print "$line" "$counter" &&
-			_script_remove "$line"
+			_script_remove "$line" &&
+			_script_alias "$line"
 
 			if [[ "$?" == 1 ]]; then
 				return 1
