@@ -85,6 +85,15 @@ _db_remove_alias() {
 		echo "AliasNotFound: '$1'"
 	fi
 }
+_db_remove_cwd() {
+	# returns 1 if error
+
+	local test_if_exists
+	test_if_exists=$(sqlite3 --separator " <--- " "$db_path" "SELECT 1 FROM aliases WHERE path = '$(pwd)'; DELETE FROM aliases WHERE path = '$(pwd)';")
+	if [ -z "$test_if_exists" ]; then
+		echo "AliasNotFound: No aliases set to current directory found"
+	fi
+}
 
 
 _goto_alias() {
@@ -154,7 +163,7 @@ _script_print() {
 	# 2 to continue to next line
 
         if [[ "$1" =~ ^[[:space:]]*:[[:space:]]*([[:alnum:].-_]*)[[:space:]]*$ ]]; then
-		if [ ${BASH_REMATCH[1]} ]; then
+		if [[ ${BASH_REMATCH[1]} ]]; then
 			_db_get_path "${BASH_REMATCH[1]}" && echo "$output" && return 2
 		else
 			_db_dump && echo "$output" && return 2
@@ -164,6 +173,23 @@ _script_print() {
 }
 
 
+_script_remove() {
+	# takes in one line of script and the line number
+	# returns:
+	# 0 to continue script
+	# 1 if error
+	# 2 to continue to next line
+
+        if [[ "$1" =~ ^[[:space:]]*\^[[:space:]]*([[:alnum:].-_]*)[[:space:]]*$ ]]; then
+		echo "remove"
+		if [[ ${BASH_REMATCH[1]} ]]; then
+			_db_remove_alias "${BASH_REMATCH[1]}" && echo "$output" && return 2
+		else
+			_db_remove_cwd && echo "$output" && return 2
+		fi
+		return 1
+	fi
+}
 
 
 
@@ -235,7 +261,8 @@ _script() {
 
 			_script_blank_line "$line" &&
 			_script_assignment "$line" "$counter" &&
-			_script_print "$line" "$counter"
+			_script_print "$line" "$counter" &&
+			_script_remove "$line"
 
 			if [[ "$?" == 1 ]]; then
 				return "$?"
