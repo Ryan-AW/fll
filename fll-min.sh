@@ -137,17 +137,17 @@ _script_assignment() {
 			return 1
 
 		elif [[ "$1" =~ ^[[:space:]]*([[:alnum:].-_]+)[[:space:]]*=[[:space:]]*$ ]]; then
-			echo "pwd assignment"
-			return 2
+			_db_set_alias "${BASH_REMATCH[1]}" "$(pwd)" && return 2
+			return "$?"
 
 		elif [[ "$1" =~ ^[[:space:]]*([[:alnum:].-_]+)[[:space:]]*=[[:space:]]*:[[:space:]]*([[:alnum:].-_]+)[[:space:]]*$ ]]; then
-			echo "itervariable assignment"
-			return 2
+			_db_get_path "${BASH_REMATCH[2]}" && _db_set_alias "${BASH_REMATCH[1]}" "$output" && return 2
+			return 1
 
 
 		elif [[ "$1" =~ ^[[:space:]]*([[:alnum:].-_]+)[[:space:]]*=[[:space:]]*([[:alnum:].-_]+)[[:space:]]*$ ]]; then
-			echo "simple assignment"
-			return 2
+			_db_set_alias "${BASH_REMATCH[1]}" "${BASH_REMATCH[2]}" && return 2
+			return "$?"
 		else
 			echo "InvalidAssignment [line $2]: '$1'"
 			return 1
@@ -266,7 +266,7 @@ _script() {
 			_script_remove "$line"
 
 			if [[ "$?" == 1 ]]; then
-				return "$?"
+				return 1
 			fi
 		done
 		return 2
