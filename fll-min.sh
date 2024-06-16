@@ -9,7 +9,7 @@ script=""
 
 
 _fll_min_completion() {
-	local cur prev aliases aliases_arr scripting_functions mode
+	local cur prev aliases aliases_arr scripting_functions mode lines
 	COMPREPLY=()
 	cur="${COMP_WORDS[COMP_CWORD]}"
 	prev="${COMP_WORDS[COMP_CWORD-1]}"
@@ -17,11 +17,12 @@ _fll_min_completion() {
 	aliases=$(sqlite3 "$db_path" "SELECT keyword FROM aliases")
 	aliases_arr=($aliases)
 
-	scripting_functions=()
+	scripting_functions=(":" "^" "," "def")
 	for alias in "${aliases_arr[@]}"; do
 		scripting_functions+=(":${alias}")
 		scripting_functions+=("^${alias}")
-		scripting_functions+=("${alias}")
+		scripting_functions+=(",${alias}")
+		scripting_functions+=("${alias},")
 	done
 
 
@@ -30,17 +31,37 @@ _fll_min_completion() {
 
 	elif [ $COMP_CWORD -eq 2 ]; then
 		case "$prev" in
-			--help|-h);;
+			--help|-h)
+				return 0;;
+			--script|-s);;
 			--print|-p|--remove|-r)
 				COMPREPLY=( $(compgen -W "$aliases" -- $cur) );;
-			--script|-s)
-				COMPREPLY=( $(compgen -W "$(echo "${scripting_functions[@]}")" -- $cur) );;
 			*)
-			COMPREPLY=( $(compgen -W "$(compgen -f -- $cur) --print --remove" -- $cur) );;
+				COMPREPLY=( $(compgen -W "$(compgen -f -- $cur) --print --remove" -- $cur) )
+				return 0;;
 		esac
+	fi
 
-	elif [[ "${COMP_WORDS[1]}" == "--script" || "${COMP_WORDS[1]}" == "-s" ]]; then
-		COMPREPLY=( $(compgen -W "it worked" -- $cur) )
+        if [[ "${COMP_WORDS[1]}" =~ (-s|--script) ]]; then
+                if [[ -z "$ZSH_VERSION" ]]; then
+                        IFS=',' read -ra lines <<< "${COMP_WORDS[@]:2}"
+                else
+                        IFS=',' read -rA lines <<< "${COMP_WORDS[@]:2}"
+                fi
+
+		if [ ${#lines[@]} -gt 0 ]; then
+			cur_line="${lines[-1]}"
+
+			if [[ "$cur_line" =~ ^[[:space:]]*$ ]]; then
+				COMPREPLY=( $(compgen -W "$aliases $(echo "${scripting_functions[@]}")" -- $cur) )
+			else
+				COMPREPLY=( $(compgen -W "$aliases $(echo "${scripting_functions[@]}")" -- $cur) )
+			fi
+
+		else
+			COMPREPLY=( $(compgen -W "$aliases $(echo "${scripting_functions[@]}")" -- $cur) )
+		fi
+
 	fi
 	return 0
 }
