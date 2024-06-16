@@ -9,28 +9,38 @@ script=""
 
 
 _fll_min_completion() {
-	local cur prev completions mode
+	local cur prev aliases aliases_arr scripting_functions mode
 	COMPREPLY=()
 	cur="${COMP_WORDS[COMP_CWORD]}"
 	prev="${COMP_WORDS[COMP_CWORD-1]}"
 
+	aliases=$(sqlite3 "$db_path" "SELECT keyword FROM aliases")
+	aliases_arr=($aliases)
+
+	scripting_functions=()
+	for alias in "${aliases_arr[@]}"; do
+		scripting_functions+=(":${alias}")
+		scripting_functions+=("^${alias}")
+		scripting_functions+=("${alias}")
+	done
+
 
 	if [ $COMP_CWORD -eq 1 ]; then
-		completions=$(sqlite3 "$db_path" "SELECT keyword FROM aliases")
-		COMPREPLY=( $(compgen -W "$completions --help --print --remove --script" -- $cur) )
-	fi
+		COMPREPLY=( $(compgen -W "$aliases --help --print --remove --script" -- $cur) )
 
-	if [ $COMP_CWORD -eq 2 ]; then
+	elif [ $COMP_CWORD -eq 2 ]; then
 		case "$prev" in
 			--help|-h);;
 			--print|-p|--remove|-r)
-				completions=$(sqlite3 "$db_path" "SELECT keyword FROM aliases")
-				COMPREPLY=( $(compgen -W "$completions" -- $cur) );;
-			--script|-l)
-				COMPREPLY=( $(compgen -f -- $cur) );;
+				COMPREPLY=( $(compgen -W "$aliases" -- $cur) );;
+			--script|-s)
+				COMPREPLY=( $(compgen -W "$(echo "${scripting_functions[@]}")" -- $cur) );;
 			*)
 			COMPREPLY=( $(compgen -W "$(compgen -f -- $cur) --print --remove" -- $cur) );;
 		esac
+
+	elif [[ "${COMP_WORDS[1]}" == "--script" || "${COMP_WORDS[1]}" == "-s" ]]; then
+		COMPREPLY=( $(compgen -W "it worked" -- $cur) )
 	fi
 	return 0
 }
