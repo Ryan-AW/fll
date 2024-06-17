@@ -9,21 +9,12 @@ script=""
 
 
 _fll_min_completion() {
-	local cur prev aliases aliases_arr scripting_functions mode lines
+	local cur prev aliases mode lines
 	COMPREPLY=()
 	cur="${COMP_WORDS[COMP_CWORD]}"
 	prev="${COMP_WORDS[COMP_CWORD-1]}"
 
-	aliases=$(sqlite3 "$db_path" "SELECT keyword FROM aliases")
-	aliases_arr=($aliases)
-
-	scripting_functions=(":" "^" "," "def")
-	for alias in "${aliases_arr[@]}"; do
-		scripting_functions+=(":${alias}")
-		scripting_functions+=("^${alias}")
-		scripting_functions+=(",${alias}")
-		scripting_functions+=("${alias},")
-	done
+	aliases="$(sqlite3 "$db_path" "SELECT keyword FROM aliases")"
 
 
 	if [ $COMP_CWORD -eq 1 ]; then
@@ -53,13 +44,24 @@ _fll_min_completion() {
 			cur_line="${lines[-1]}"
 
 			if [[ "$cur_line" =~ ^[[:space:]]*$ ]]; then
-				COMPREPLY=( $(compgen -W "$aliases $(echo "${scripting_functions[@]}")" -- $cur) )
+				echo "[space]" >> ~/fll/output.txt
+				COMPREPLY=( $(compgen -W ": ^ , def $aliases" -- $cur) )
+
+			elif [[ "$cur_line" =~ ^[[:space:]]*[:^][[:space:]]*[[:alnum:]]*$ ]]; then
+				echo "[alias]: $cur_line" >> ~/fll/output.txt
+				COMPREPLY=( $(compgen -W "$aliases" -- $cur) )
+
+			elif [[ "$cur_line" =~ *"="* ]]; then
+				echo "[assignment]: $cur_line" >> ~/fll/output.txt
+
 			else
-				COMPREPLY=( $(compgen -W "$aliases $(echo "${scripting_functions[@]}")" -- $cur) )
+				echo "[!space]: $cur_line" >> ~/fll/output.txt
+				COMPREPLY=( $(compgen -W "," -- $cur) )
 			fi
 
 		else
-			COMPREPLY=( $(compgen -W "$aliases $(echo "${scripting_functions[@]}")" -- $cur) )
+			echo "[else]: $cur_line" >> ~/fll/output.txt
+			COMPREPLY=( $(compgen -W ": ^ , def $aliases" -- $cur) )
 		fi
 
 	fi
@@ -267,7 +269,7 @@ _script_remove() {
 		if [[ ${BASH_REMATCH[1]} ]]; then
 			_db_remove_alias "${BASH_REMATCH[1]}" && echo "$output" && return 2
 		else
-			_db_remove_cwd && echo "$output" && return 2
+			_db_remove_cwd && return 2
 		fi
 		return 1
 	fi
@@ -467,7 +469,7 @@ _remove() {
 			_db_remove_alias "$2" && return 2
 			return 1
 		else
-			_db_remove_cwd && echo "$output" && return 2
+			_db_remove_cwd && return 2
 			return 1
 		fi
 	elif [[ "$2" == "--remove" || "$2" == "-r" ]]; then
