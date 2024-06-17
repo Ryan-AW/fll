@@ -18,7 +18,7 @@ _fll_min_completion() {
 
 
 	if [ $COMP_CWORD -eq 1 ]; then
-		COMPREPLY=( $(compgen -W "$aliases --help --print --remove --script" -- $cur) )
+		COMPREPLY=( $(compgen -W "$aliases --help -h --print -p --remove -r --script -s" -- $cur) )
 
 	elif [ $COMP_CWORD -eq 2 ]; then
 		case "$prev" in
@@ -28,7 +28,7 @@ _fll_min_completion() {
 			--print|-p|--remove|-r)
 				COMPREPLY=( $(compgen -W "$aliases" -- $cur) );;
 			*)
-				COMPREPLY=( $(compgen -W "$(compgen -f -- $cur) --print --remove" -- $cur) )
+				COMPREPLY=( $(compgen -W "$(compgen -f -- $cur) --print -p --remove -r" -- $cur) )
 				return 0;;
 		esac
 	fi
