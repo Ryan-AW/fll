@@ -50,7 +50,7 @@ _fll_min_completion() {
 				COMPREPLY=( $(compgen -W "$aliases" -- $cur) )
 
 			elif [[ "$cur_line" =~ *"="* ]]; then
-				;
+				:
 
 			else
 				COMPREPLY=( $(compgen -W "," -- $cur) )
