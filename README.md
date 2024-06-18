@@ -10,8 +10,8 @@ This cli program will save you time and hassle, especially if you work with deep
 
 ### example usage:
 ``` console
-user@test-user:/$ fll path1 this/is/a/sample/path/  # sets alias "path1"
-user@test-user:/$ fll path1                         # changes directory using the alias "path1"
+user@test-user:/$ fll path1 this/is/a/sample/path/ # sets alias "path1"
+user@test-user:/$ fll path1                        # changes directory using the alias "path1"
 user@test-user:/this/is/a/sample/path$ 
 ```
 
