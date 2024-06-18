@@ -37,10 +37,8 @@ _fll_min_completion() {
 		args="${COMP_WORDS[@]:2:$COMP_CWORD-1}"
 		cur_line=${args##*,}
 
-		echo "line = '$cur_line'" >> ~/fll/output.txt
 
 		if [[ "$cur_line" =~ ^[[:space:]]*$ ]]; then
-			echo "[:space:]: $cur_line" >> ~/fll/output.txt
 			COMPREPLY=( $(compgen -W ": ^ , def end $aliases" -- $cur) )
 
 		elif [[ "$cur_line" =~ ^[:space:]*[:^] ]]; then
@@ -55,7 +53,6 @@ _fll_min_completion() {
 		fi
 
 	else
-		echo "else = '$cur_line'" >> ~/fll/output.txt
 		COMPREPLY=( $(compgen -W ": ^ , def end $aliases" -- $cur) )
 	fi
 
