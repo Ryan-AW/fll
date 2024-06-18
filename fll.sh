@@ -44,23 +44,19 @@ _fll_min_completion() {
 			cur_line="${lines[-1]}"
 
 			if [[ "$cur_line" =~ ^[[:space:]]*$ ]]; then
-				echo "[space]" >> ~/fll/output.txt
 				COMPREPLY=( $(compgen -W ": ^ , def $aliases" -- $cur) )
 
 			elif [[ "$cur_line" =~ ^[[:space:]]*[:^][[:space:]]*[[:alnum:]]*$ ]]; then
-				echo "[alias]: $cur_line" >> ~/fll/output.txt
 				COMPREPLY=( $(compgen -W "$aliases" -- $cur) )
 
 			elif [[ "$cur_line" =~ *"="* ]]; then
-				echo "[assignment]: $cur_line" >> ~/fll/output.txt
+				;
 
 			else
-				echo "[!space]: $cur_line" >> ~/fll/output.txt
 				COMPREPLY=( $(compgen -W "," -- $cur) )
 			fi
 
 		else
-			echo "[else]: $cur_line" >> ~/fll/output.txt
 			COMPREPLY=( $(compgen -W ": ^ , def $aliases" -- $cur) )
 		fi
 
