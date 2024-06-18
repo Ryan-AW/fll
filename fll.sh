@@ -9,7 +9,8 @@ script=""
 
 
 _fll_min_completion() {
-	local cur prev aliases mode lines
+	local cur prev aliases mode lines args cur_line
+
 	COMPREPLY=()
 	cur="${COMP_WORDS[COMP_CWORD]}"
 	prev="${COMP_WORDS[COMP_CWORD-1]}"
@@ -31,36 +32,33 @@ _fll_min_completion() {
 				COMPREPLY=( $(compgen -W "$(compgen -f -- $cur) --print -p --remove -r" -- $cur) )
 				return 0;;
 		esac
-	fi
 
-        if [[ "${COMP_WORDS[1]}" =~ (-s|--script) ]]; then
-                if [[ -z "$ZSH_VERSION" ]]; then
-                        IFS=',' read -ra lines <<< "${COMP_WORDS[@]:2}"
-                else
-                        IFS=',' read -rA lines <<< "${COMP_WORDS[@]:2}"
-                fi
+        elif [[ "${COMP_WORDS[1]}" =~ (-s|--script) ]]; then
+		args="${COMP_WORDS[@]:2:$COMP_CWORD-1}"
+		cur_line=${args##*,}
 
-		if [ ${#lines[@]} -gt 0 ]; then
-			cur_line="${lines[-1]}"
+		echo "line = '$cur_line'" >> ~/fll/output.txt
 
-			if [[ "$cur_line" =~ ^[[:space:]]*$ ]]; then
-				COMPREPLY=( $(compgen -W ": ^ , def $aliases" -- $cur) )
+		if [[ "$cur_line" =~ ^[[:space:]]*$ ]]; then
+			echo "[:space:]: $cur_line" >> ~/fll/output.txt
+			COMPREPLY=( $(compgen -W ": ^ , def end $aliases" -- $cur) )
 
-			elif [[ "$cur_line" =~ ^[[:space:]]*[:^][[:space:]]*[[:alnum:]]*$ ]]; then
+		elif [[ "$cur_line" =~ ^[:space:]*[:^] ]]; then
+			if [[ "$prev" == ":" ]]; then
 				COMPREPLY=( $(compgen -W "$aliases" -- $cur) )
-
-			elif [[ "$cur_line" =~ *"="* ]]; then
-				:
-
 			else
-				COMPREPLY=( $(compgen -W "," -- $cur) )
+				return 0
 			fi
 
 		else
-			COMPREPLY=( $(compgen -W ": ^ , def $aliases" -- $cur) )
+			COMPREPLY=( $(compgen -W "," -- $cur) )
 		fi
 
+	else
+		echo "else = '$cur_line'" >> ~/fll/output.txt
+		COMPREPLY=( $(compgen -W ": ^ , def end $aliases" -- $cur) )
 	fi
+
 	return 0
 }
 complete -F _fll_min_completion fll
