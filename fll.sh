@@ -29,7 +29,7 @@ _fll_min_completion() {
 			--print|-p|--remove|-r)
 				COMPREPLY=( $(compgen -W "$aliases" -- $cur) );;
 			*)
-				COMPREPLY=( $(compgen -W "$(compgen -f -- $cur) --print --remove" -- $cur) ):
+				COMPREPLY=( $(compgen -W "$(compgen -f -- $cur) --print --remove" -- $cur) )
 				return 0;;
 		esac
 
@@ -168,7 +168,18 @@ _del_template() {
 		return 1
 	fi
 }
-_print_template() {
+_dump_templates() {
+	# returns 1 if error
+
+	local test_if_exists
+	test_if_exists=$(sqlite3 "$db_path" "SELECT script FROM templates WHERE keyword = '$1'")
+
+	if [ -z "test_if_exists" ]; then
+		echo "TemplateNotFound: '$1'"
+		return 1
+	fi
+}
+print_template() {
 	# takes in the template name
 	# sets output = the script
 	# returns 1 if error
@@ -301,7 +312,12 @@ _script_template() {
 			return 1
 
                 elif [ ${BASH_REMATCH[1]} = "print" ]; then
-			_print_template "${BASH_REMATCH[2]}" && return 2
+			if [[ "${BASH_REMATCH[2]}" == ":" ]]; then
+				_dump_templates && return 2
+				return 1
+			else
+				_print_template "${BASH_REMATCH[2]}" && return 2
+			fi
 			return 1
 
                 elif [ ${BASH_REMATCH[1]} = "end" ]; then
@@ -372,6 +388,35 @@ _help() {
 			echo '  fll -r myalias  Unassigns "myalias"'
 			echo '  fll myalias /path/to/save  Set the path for "myalias" to "/path/to/save"'
 			echo '  fll -s          Enter FLL scripting mode (all following commands will be interpreted as FLL)'
+			echo
+			echo "SCRIPT syntax"
+			echo
+			echo "to run multiple commands in a row separate them with ','"
+			echo "e.g. fll -s home = /home/, :home"
+			echo
+			echo "System commands:"
+			echo "	':'     show all aliases"
+			echo "	'^'     delete all aliases that link to the current directory"
+			echo
+			echo "Alias assignment:"
+			echo "	'<alias> = '                         sets an alias to the current path"
+			echo "	'<alias> = directory_path'           sets an alias to the specified path"
+			echo "	'<newAlias> = :<existingAlias>' sets an alias to the value of an already existing alias"
+			echo
+			echo "Statements:"
+			echo "	'<alias>'    changes directory using the alias"
+			echo "	':<alias>'   shows what the specified alias is"
+			echo "	'^<alias>'   removes specified alias"
+			echo
+			echo "Templates:"
+			echo "	'def <template>'		starts recording template"
+			echo "	'end def'			stop recording template and saves it"
+			echo "	'run <template>'		execute the specified template"
+			echo
+			echo "	'del <template>'		deletes specified template"
+			echo "	'print <template>'		displays specified template"
+			echo "	'print :'			displays all templates"
+
 			return 2
 		fi
 	done
