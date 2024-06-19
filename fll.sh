@@ -19,41 +19,39 @@ _fll_min_completion() {
 
 
 	if [ $COMP_CWORD -eq 1 ]; then
-		COMPREPLY=( $(compgen -W "$aliases" -- $cur) )
+		if [[ "$cur" == -* ]]; then
+			COMPREPLY=( $(compgen -W "$(compgen -d -- "$cur") --print --remove --help --script" -- $cur) )
+		else
+			COMPREPLY=( $(compgen -W "$aliases" -- $cur) )
+		fi
+		return 0
 
 	elif [ $COMP_CWORD -eq 2 ]; then
 		case "$prev" in
 			--help|-h)
 				return 0;;
-			--script|-s);;
+			--script|-s)
+				COMPREPLY=( $(compgen -W "$aliases" -- $cur) )
+				return 0;;
 			--print|-p|--remove|-r)
-				COMPREPLY=( $(compgen -W "$aliases" -- $cur) );;
+				COMPREPLY=( $(compgen -W "$aliases" -- $cur) )
+				return 0;;
 			*)
-				COMPREPLY=( $(compgen -W "$(compgen -f -- $cur) --print --remove" -- $cur) )
+				if [[ "$cur" == -* ]]; then
+					COMPREPLY=( $(compgen -W "$(compgen -d -- "$cur") --print --remove" -- $cur) )
+				else
+					COMPREPLY=( $(compgen -d -- "$cur") )
+				fi
 				return 0;;
 		esac
+	fi
 
-        elif [[ "${COMP_WORDS[1]}" =~ (-s|--script) ]]; then
-		args="${COMP_WORDS[@]:2:$COMP_CWORD-1}"
-		cur_line=${args##*,}
-
-
-		if [[ "$cur_line" =~ ^[[:space:]]*$ ]]; then
-			COMPREPLY=( $(compgen -W ": ^ , def end $aliases" -- $cur) )
-
-		elif [[ "$cur_line" =~ ^[:space:]*[:^] ]]; then
-			if [[ "$prev" == ":" ]]; then
-				COMPREPLY=( $(compgen -W "$aliases" -- $cur) )
-			else
-				return 0
-			fi
-
+        if [[ "${COMP_WORDS[1]}" =~ (-s|--script) ]]; then
+		if [[ "$prev" == "=" ]]; then
+			COMPREPLY=( $(compgen -d -- "$cur") )
 		else
-			COMPREPLY=( $(compgen -W "," -- $cur) )
+			COMPREPLY=( $(compgen -W "$aliases" -- $cur) )
 		fi
-
-	else
-		COMPREPLY=( $(compgen -W ": ^ , def end $aliases" -- $cur) )
 	fi
 
 	return 0
