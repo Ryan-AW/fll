@@ -124,7 +124,7 @@ _dump_templates() {
 		return 1
 	fi
 }
-_rint_template() {
+_print_template() {
 	# takes in the template name
 	# sets output = the script
 	# returns 1 if error
@@ -509,7 +509,7 @@ unset _goto_alias
 unset _get_template
 unset _del_template
 unset _dump_templates
-unset print_template
+unset _print_template
 unset _script_blank_line
 unset _script_assignment
 unset _script_print
