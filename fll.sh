@@ -124,7 +124,7 @@ _dump_templates() {
 		return 1
 	fi
 }
-print_template() {
+_rint_template() {
 	# takes in the template name
 	# sets output = the script
 	# returns 1 if error
@@ -491,3 +491,34 @@ _handle_aliases "$1" "$2"
 if [[ "$ZSH_VERSION" ]]; then
 	unsetopt BASH_REMATCH
 fi
+
+
+# unset variables
+unset db_path
+unset output
+unset script_name
+unset script
+
+# unset functions
+unset _db_dump
+unset _db_get_path
+unset _db_set_alias
+unset _db_remove_alias
+unset _db_remove_cwd
+unset _goto_alias
+unset _get_template
+unset _del_template
+unset _dump_templates
+unset print_template
+unset _script_blank_line
+unset _script_assignment
+unset _script_print
+unset _script_remove
+unset _script_alias
+unset _script_template
+unset _script_invalid_syntax
+unset _help
+unset _script
+unset _print
+unset _remove
+unset _handle_aliases
