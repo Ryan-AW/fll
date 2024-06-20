@@ -24,9 +24,10 @@ sudo apt install sqlite3
 ``` console
 git clone https://github.com/Ryan-AW/fll ~/fll
 ```
-then add this line to your ~/.bashrc file (or ~/.zshrc if you use Zsh):
+then add these two lines to your ~/.bashrc file (or ~/.zshrc if you use Zsh):
 ``` console
 alias fll='source ~/fll/fll.sh'
+source "${HOME}/fll/fll_completion.sh"
 ```
 **important**
 Ensure that the path points to where you cloned the repository.
