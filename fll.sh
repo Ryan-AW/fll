@@ -119,7 +119,7 @@ _dump_templates() {
 	local test_if_exists
 	test_if_exists=$(sqlite3 --separator " <--- " "$db_path" "SELECT * FROM templates")
 
-	if [ -z "test_if_exists" ]; then
+	if [ -z "$test_if_exists" ]; then
 		echo "TemplateNotFound: No Templates Found"
 		return 1
 	else
