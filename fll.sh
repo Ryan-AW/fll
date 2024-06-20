@@ -117,11 +117,13 @@ _dump_templates() {
 	# returns 1 if error
 
 	local test_if_exists
-	test_if_exists=$(sqlite3 "$db_path" "SELECT script FROM templates WHERE keyword = '$1'")
+	test_if_exists=$(sqlite3 --separator " <--- " "$db_path" "SELECT * FROM templates")
 
 	if [ -z "test_if_exists" ]; then
-		echo "TemplateNotFound: '$1'"
+		echo "TemplateNotFound: No Templates Found"
 		return 1
+	else
+		echo "$test_if_exists"
 	fi
 }
 _print_template() {
@@ -261,7 +263,8 @@ _script_template() {
 				_dump_templates && return 2
 				return 1
 			else
-				_print_template "${BASH_REMATCH[2]}" && return 2
+				_print_template "${BASH_REMATCH[2]}" && echo "$output" && return 2
+				return 1
 			fi
 			return 1
 
