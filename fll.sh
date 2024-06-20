@@ -349,7 +349,7 @@ _help() {
 			echo "Alias assignment:"
 			echo "	'<alias> = '                         sets an alias to the current path"
 			echo "	'<alias> = directory_path'           sets an alias to the specified path"
-			echo "	'<newAlias> = :<existingAlias>' sets an alias to the value of an already existing alias"
+			echo "	'<newAlias> = :<existingAlias>'      sets an alias to the value of an already existing alias"
 			echo
 			echo "Statements:"
 			echo "	'<alias>'    changes directory using the alias"
