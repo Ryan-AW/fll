@@ -490,7 +490,7 @@ _script "$@" &&
 _print "$1" "$2" &&
 _remove "$1" "$2" &&
 _handle_aliases "$1" "$2" &&
-printf 'Error: No alias provided.\nAdd the `--help` flag for usage info.'
+printf 'No Alias Provided.\nUse `--help` for more info.'
 
 if [[ "$ZSH_VERSION" ]]; then
 	unsetopt BASH_REMATCH
