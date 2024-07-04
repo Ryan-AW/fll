@@ -530,4 +530,7 @@ unset _print
 unset _remove
 unset _handle_aliases
 
-exit "$exit_code"
+if [[ "$exit_code" -eq "1" ]]; then
+	exit "$exit_code"
+fi
+exit 0
