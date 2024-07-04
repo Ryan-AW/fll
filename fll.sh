@@ -490,7 +490,10 @@ _script "$@" &&
 _print "$1" "$2" &&
 _remove "$1" "$2" &&
 _handle_aliases "$1" "$2" &&
-printf 'No Alias Provided.\nUse `--help` for more info.'
+(printf 'No Alias Provided.\nUse `--help` for more info.\n' &&
+exit 1)
+exit_code="$?"
+
 
 if [[ "$ZSH_VERSION" ]]; then
 	unsetopt BASH_REMATCH
@@ -526,3 +529,5 @@ unset _script
 unset _print
 unset _remove
 unset _handle_aliases
+
+exit "$exit_code"
