@@ -70,85 +70,6 @@ _goto_alias() {
 	_db_get_path "$1" && cd "$output"
 	return "$?"
 }
-
-
-
-
-
-
-
-_get_template() {
-	# takes in the template name and line count
-	# sets output = template content
-	# returns 1 if error
-
-	output=$(sqlite3 "$db_path" "SELECT script FROM templates WHERE keyword = '$1'")
-
-	if [ "$output" ]; then
-		if [[ -z "$ZSH_VERSION" ]]; then
-		    IFS=',' read -ra template <<< "$output"
-		else
-		    IFS=',' read -rA template <<< "$output"
-		fi
-
-		lines=("${lines[@]:0:$2}" "${template[@]}" "${lines[@]:$2}")
-	else
-		echo "TemplateNotFound: '${BASH_REMATCH[2]}'"
-		return 1
-	fi
-}
-
-_del_template() {
-	# takes in the template name
-	# returns 1 if error
-
-	local test_if_exists
-	test_if_exists=$(sqlite3 "$db_path" "SELECT 1 FROM templates WHERE keyword = '$1'; DELETE FROM templates WHERE keyword = '$1';")
-
-	if [ -z "$test_if_exists" ]; then
-		echo "TemplateNotFound: '$1'"
-		return 1
-	fi
-}
-_dump_templates() {
-	# returns 1 if error
-
-	local test_if_exists
-	test_if_exists=$(sqlite3 --separator " <--- " "$db_path" "SELECT * FROM templates")
-
-	if [ -z "$test_if_exists" ]; then
-		echo "TemplateNotFound: No Templates Found"
-		return 1
-	else
-		echo "$test_if_exists"
-	fi
-}
-_print_template() {
-	# takes in the template name
-	# sets output = the script
-	# returns 1 if error
-
-	output=$(sqlite3 "$db_path" "SELECT script FROM templates WHERE keyword = '$1'")
-
-	if [ -z "$output" ]; then
-		echo "TemplateNotFound: '$1'"
-		return 1
-	fi
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 _help() {
 	# takes in all arguments
 	# returns:
@@ -303,10 +224,6 @@ unset _db_set_alias
 unset _db_remove_alias
 unset _db_remove_cwd
 unset _goto_alias
-unset _get_template
-unset _del_template
-unset _dump_templates
-unset _print_template
 unset _help
 unset _print
 unset _remove
