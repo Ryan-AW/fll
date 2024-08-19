@@ -490,9 +490,7 @@ _script "$@" &&
 _print "$1" "$2" &&
 _remove "$1" "$2" &&
 _handle_aliases "$1" "$2" &&
-(printf 'No Alias Provided.\nUse `--help` for more info.\n' &&
-exit 1)
-exit_code="$?"
+printf 'No Alias Provided.\nUse `--help` for more info.\n'
 
 
 if [[ "$ZSH_VERSION" ]]; then
@@ -529,8 +527,3 @@ unset _script
 unset _print
 unset _remove
 unset _handle_aliases
-
-if [[ "$exit_code" -eq "1" ]]; then
-	exit "$exit_code"
-fi
-exit 0
