@@ -85,8 +85,8 @@ _help() {
 			echo '  -r, --remove'
 			echo
 			echo 'Arguments:'
-			echo '  alias          The alias to manage'
-			echo '  path           The path to set for the alias (optional)'
+			echo '  alias          The alias name'
+			echo '  path           The path to set the alias (optional)'
 			echo
 			echo 'Assigning an alias:'
 			echo '  fll myAlias /path/to/save  Set the path for "myAlias" to "/path/to/save"'
