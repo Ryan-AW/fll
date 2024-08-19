@@ -1,4 +1,3 @@
-# fll
 ## Fll allows you to create short aliases for directory paths. Then next time you need to navigate there you can use the alias instead!
 
 Fll is a simple yet powerful utility program -
