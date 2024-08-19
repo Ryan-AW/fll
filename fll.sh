@@ -91,11 +91,11 @@ _help() {
 			echo
 			echo 'Examples:'
 			echo '  fll -h          Show this help menu'
-			echo '  fll myalias     Change Directory using "myalias" alias'
-			echo '  fll -p myalias  Print the path for "myalias"'
+			echo '  fll myAlias     Change Directory using "myAlias" alias'
+			echo '  fll -p myAlias  Print the path for "myAlias"'
 			echo '  fll -r          Unassigns all aliases that point to the current working directory'
-			echo '  fll -r myalias  Unassigns "myalias"'
-			echo '  fll myalias /path/to/save  Set the path for "myalias" to "/path/to/save"'
+			echo '  fll -r myAlias  Unassigns "myAlias"'
+			echo '  fll myAlias /path/to/save  Set the path for "myAlias" to "/path/to/save"'
 			return 2
 		fi
 	done
