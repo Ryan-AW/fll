@@ -84,7 +84,6 @@ _help() {
 			echo '  -h, --help     Show this help menu'
 			echo '  -p, --print    Print the alias'
 			echo '  -r, --remove   Remove the alias'
-			echo '  -s, --script   Interpret all following commands as FLL script (must be first argument)'
 			echo
 			echo 'Arguments:'
 			echo '  alias          The alias to manage (required unless using --script)'
@@ -97,36 +96,6 @@ _help() {
 			echo '  fll -r          Unassigns all aliases that point to the current working directory'
 			echo '  fll -r myalias  Unassigns "myalias"'
 			echo '  fll myalias /path/to/save  Set the path for "myalias" to "/path/to/save"'
-			echo '  fll -s          Enter FLL scripting mode (all following commands will be interpreted as FLL)'
-			echo
-			echo "SCRIPT syntax"
-			echo
-			echo "to run multiple commands in a row separate them with ','"
-			echo "e.g. fll -s home = /home/, :home"
-			echo
-			echo "System commands:"
-			echo "	':'     show all aliases"
-			echo "	'^'     delete all aliases that link to the current directory"
-			echo
-			echo "Alias assignment:"
-			echo "	'<alias> = '                         sets an alias to the current path"
-			echo "	'<alias> = directory_path'           sets an alias to the specified path"
-			echo "	'<newAlias> = :<existingAlias>'      sets an alias to the value of an already existing alias"
-			echo
-			echo "Statements:"
-			echo "	'<alias>'    changes directory using the alias"
-			echo "	':<alias>'   shows what the specified alias is"
-			echo "	'^<alias>'   removes specified alias"
-			echo
-			echo "Templates:"
-			echo "	'def <template>'		starts recording template"
-			echo "	'end def'			stop recording template and saves it"
-			echo "	'run <template>'		execute the specified template"
-			echo
-			echo "	'del <template>'		deletes specified template"
-			echo "	'print <template>'		displays specified template"
-			echo "	'print :'			displays all templates"
-
 			return 2
 		fi
 	done
