@@ -80,9 +80,9 @@ _help() {
 			echo 'Usage: fll [[options] <alias>|<alias> <path>]'
 			echo
 			echo 'Options:'
-			echo '  -h, --help     Show this help menu'
-			echo '  -p, --print    Print the alias'
-			echo '  -r, --remove   Remove the alias'
+			echo '  -h, --help'
+			echo '  -p, --print'
+			echo '  -r, --remove'
 			echo
 			echo 'Arguments:'
 			echo '  alias          The alias to manage'
