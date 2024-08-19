@@ -77,7 +77,7 @@ _help() {
 	# 2 if success but the program should halt
 	for arg in "$@"; do
 		if [ "$arg" = "-h" -o "$arg" = "--help" ]; then
-			echo 'Usage: fll [options] <alias> <path>'
+			echo 'Usage: fll [[options] <alias>|<alias> <path>]'
 			echo
 			echo 'Options:'
 			echo '  -h, --help     Show this help menu'
@@ -88,13 +88,19 @@ _help() {
 			echo '  alias          The alias to manage'
 			echo '  path           The path to set for the alias (optional)'
 			echo
-			echo 'Examples:'
-			echo '  fll -h          Show this help menu'
-			echo '  fll myAlias     Change Directory using "myAlias" alias'
-			echo '  fll -p myAlias  Print the path for "myAlias"'
+			echo 'Assigning an alias:'
+			echo '  fll myAlias /path/to/save  Set the path for "myAlias" to "/path/to/save"'
+			echo
+			echo 'Using an alias:'
+			echo '  fll myAlias     Change directory using "myAlias" alias'
+			echo
+			echo 'Removing aliases:'
 			echo '  fll -r          Unassigns all aliases that point to the current working directory'
 			echo '  fll -r myAlias  Unassigns "myAlias"'
-			echo '  fll myAlias /path/to/save  Set the path for "myAlias" to "/path/to/save"'
+			echo
+			echo 'Displaying aliases:'
+			echo '  fll -p          Print all aliases'
+			echo '  fll -p myAlias  Print the path for "myAlias"'
 			return 2
 		fi
 	done
