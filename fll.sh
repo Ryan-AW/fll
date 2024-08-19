@@ -489,7 +489,9 @@ _help "$@" &&
 _script "$@" &&
 _print "$1" "$2" &&
 _remove "$1" "$2" &&
-_handle_aliases "$1" "$2"
+_handle_aliases "$1" "$2" &&
+printf 'No Alias Provided.\nUse `--help` for more info.\n'
+
 
 if [[ "$ZSH_VERSION" ]]; then
 	unsetopt BASH_REMATCH
