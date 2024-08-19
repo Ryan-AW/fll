@@ -86,7 +86,7 @@ _help() {
 			echo '  -r, --remove   Remove the alias'
 			echo
 			echo 'Arguments:'
-			echo '  alias          The alias to manage (required unless using --script)'
+			echo '  alias          The alias to manage'
 			echo '  path           The path to set for the alias (optional)'
 			echo
 			echo 'Examples:'
