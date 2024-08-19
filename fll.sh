@@ -2,9 +2,6 @@
 
 db_path="$(dirname "${BASH_SOURCE[0]:-${(%):-%x}}")/aliases.db"
 output=""
-script_name=""
-script=""
-
 
 
 _db_dump() {
@@ -146,162 +143,6 @@ _print_template() {
 
 
 
-_script_blank_line() {
-	# takes in one line of script
-	# returns:
-	# 0 to continue script
-	# 1 if error
-	# 2 to continue to next line
-
-	if [[ "$1" =~ ^[[:space:]]*$ ]]; then
-		echo "empty line"
-	fi
-}
-
-_script_assignment() {
-	# takes in one line of script and the line number
-	# returns:
-	# 0 to continue script
-	# 1 if error
-	# 2 to continue to next line
-
-	if [[ "$1" == *"="* ]]; then
-		if [[ "$1" =~ ^.*[:^].*= ]]; then
-			echo "InvalidAssignmentError [line $2]: ':' and '^' are reserved keywords"
-			return 1
-
-		elif [[ "$1" =~ ^[[:space:]]*([[:alnum:].-_]+)[[:space:]]*=[[:space:]]*$ ]]; then
-			_db_set_alias "${BASH_REMATCH[1]}" "$(pwd)" && return 2
-			return "$?"
-
-		elif [[ "$1" =~ ^[[:space:]]*([[:alnum:].-_]+)[[:space:]]*=[[:space:]]*:[[:space:]]*([[:alnum:].-_]+)[[:space:]]*$ ]]; then
-			_db_get_path "${BASH_REMATCH[2]}" && _db_set_alias "${BASH_REMATCH[1]}" "$output" && return 2
-			return 1
-
-
-		elif [[ "$1" =~ ^[[:space:]]*([[:alnum:].-_]+)[[:space:]]*=[[:space:]]*([[:alnum:].-_]+)[[:space:]]*$ ]]; then
-			_db_set_alias "${BASH_REMATCH[1]}" "${BASH_REMATCH[2]}" && return 2
-			return "$?"
-		else
-			echo "InvalidAssignment [line $2]: '$1'"
-			return 1
-		fi
-	fi
-}
-
-_script_print() {
-	# takes in one line of script and the line number
-	# returns:
-	# 0 to continue script
-	# 1 if error
-	# 2 to continue to next line
-
-        if [[ "$1" =~ ^[[:space:]]*:[[:space:]]*([[:alnum:].-_]*)[[:space:]]*$ ]]; then
-		if [[ ${BASH_REMATCH[1]} ]]; then
-			_db_get_path "${BASH_REMATCH[1]}" && echo "$output" && return 2
-		else
-			_db_dump && echo "$output" && return 2
-			return 1
-		fi
-	fi
-}
-
-
-_script_remove() {
-	# takes in one line of script and the line number
-	# returns:
-	# 0 to continue script
-	# 1 if error
-	# 2 to continue to next line
-
-        if [[ "$1" =~ ^[[:space:]]*\^[[:space:]]*([[:alnum:].-_]*)[[:space:]]*$ ]]; then
-		if [[ ${BASH_REMATCH[1]} ]]; then
-			_db_remove_alias "${BASH_REMATCH[1]}" && echo "$output" && return 2
-		else
-			_db_remove_cwd && return 2
-		fi
-		return 1
-	fi
-}
-
-
-_script_alias() {
-	# takes in one line of script
-	# returns:
-	# 0 to continue script
-	# 1 if error
-	# 2 to continue to next line
-
-        if [[ "$1" =~ ^[[:space:]]*([[:alnum:].-_]*)[[:space:]]*$ ]]; then
-		_goto_alias "${BASH_REMATCH[1]}" && return 2
-		return 1
-	fi
-}
-
-_script_template() {
-	# takes in one line of script and the line number
-	# returns:
-	# 0 to continue script
-	# 1 if error
-	# 2 to continue to next line
-
-	if [[ $line =~ ^[[:space:]]*([[:alnum:].-_]*)[[:space:]]*([[:alnum:].-_]*)[[:space:]]*$ ]]; then
-		if [ ${BASH_REMATCH[1]} = "def" ]; then
-			script_name="${BASH_REMATCH[2]}"
-			script=""
-
-                elif [ ${BASH_REMATCH[1]} = "del" ]; then
-			_del_template "${BASH_REMATCH[2]}" && return 2
-			return 1
-
-                elif [ ${BASH_REMATCH[1]} = "run" ]; then
-			_get_template "${BASH_REMATCH[2]}" "$2" && return 2
-			return 1
-
-                elif [ ${BASH_REMATCH[1]} = "print" ]; then
-			if [[ "${BASH_REMATCH[2]}" == ":" ]]; then
-				_dump_templates && return 2
-				return 1
-			else
-				_print_template "${BASH_REMATCH[2]}" && echo "$output" && return 2
-				return 1
-			fi
-			return 1
-
-                elif [ ${BASH_REMATCH[1]} = "end" ]; then
-                        if [ ${BASH_REMATCH[2]} = "def" ]; then
-                                if [ -z "$script_name" ]; then
-                                        echo "No starting def"
-					return 1
-				else
-					sqlite3 --separator " <--- " "$db_path" "REPLACE INTO templates VALUES ('$script_name', '$script')"
-					script=""
-					script_name=""
-				fi
-                        else
-                                echo "only 'def' can be ended, correct syntax is 'end def'"
-                        fi
-                else
-                        echo "SyntaxError [line $counter]: $line"
-                fi
-	fi
-}
-
-
-_script_invalid_syntax() {
-	# takes in one line of script and the line number
-	# returns 1
-
-	echo "SyntaxError"
-	return 1
-}
-
-
-
-
-
-
-
 
 
 
@@ -368,52 +209,6 @@ _help() {
 			return 2
 		fi
 	done
-}
-_script() {
-	# takes in the all arguments
-	# returns:
-	# 0 to continue
-	# 1 if error
-	# 2 if success but the program should halt
-
-	local lines counter line
-	if [[ "$1" =~ (-s|--script) ]]; then
-		shift
-		if [[ -z "$ZSH_VERSION" ]]; then
-			IFS=',' read -ra lines <<< "$*"
-		else
-			IFS=',' read -rA lines <<< "$*"
-		fi
-
-		counter=0
-		while [ $counter -lt ${#lines[@]} ]; do
-			line="${lines[$counter]}"
-			((counter++))
-
-			_script_blank_line "$line" &&
-			_script_assignment "$line" "$counter" &&
-			_script_print "$line" "$counter" &&
-			_script_remove "$line" &&
-			_script_alias "$line" &&
-			_script_template "$line" "$counter" &&
-			_script_invalid_syntax "$line" "$counter"
-
-			if [ "$script_name" ]; then
-				if [ "$script" = "," ]; then
-					script="$line"
-				elif [ "$script" ]; then
-					script="$script, $line"
-				else
-					script=","
-				fi
-			fi
-
-			if [[ "$?" == 1 ]]; then
-				return 1
-			fi
-		done
-		return 2
-	fi
 }
 _print() {
 	# takes in the first two arguments
@@ -486,7 +281,6 @@ if [[ "$ZSH_VERSION" ]]; then
 fi
 
 _help "$@" &&
-_script "$@" &&
 _print "$1" "$2" &&
 _remove "$1" "$2" &&
 _handle_aliases "$1" "$2" &&
@@ -501,8 +295,6 @@ fi
 # unset variables
 unset db_path
 unset output
-unset script_name
-unset script
 
 # unset functions
 unset _db_dump
@@ -515,15 +307,7 @@ unset _get_template
 unset _del_template
 unset _dump_templates
 unset _print_template
-unset _script_blank_line
-unset _script_assignment
-unset _script_print
-unset _script_remove
-unset _script_alias
-unset _script_template
-unset _script_invalid_syntax
 unset _help
-unset _script
 unset _print
 unset _remove
 unset _handle_aliases
