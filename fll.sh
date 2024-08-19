@@ -78,7 +78,6 @@ _help() {
 	for arg in "$@"; do
 		if [ "$arg" = "-h" -o "$arg" = "--help" ]; then
 			echo 'Usage: fll [options] <alias> <path>'
-			echo 'Or usage: fll --script/-s [fll SCRIPT ...]'
 			echo
 			echo 'Options:'
 			echo '  -h, --help     Show this help menu'
