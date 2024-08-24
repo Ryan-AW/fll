@@ -39,15 +39,6 @@ _fll_completion() {
 				return 0;;
 		esac
 	fi
-
-        if [[ "${COMP_WORDS[1]}" =~ (-s|--script) ]]; then
-		if [[ "$prev" == "=" ]]; then
-			COMPREPLY=( $(compgen -d -- "$cur") )
-		else
-			COMPREPLY=( $(compgen -W "$aliases" -- $cur) )
-		fi
-	fi
-
 	return 0
 }
 complete -F _fll_completion fll
