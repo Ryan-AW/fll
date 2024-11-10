@@ -47,13 +47,19 @@ _db_set_alias() {
 }
 _db_remove_alias() {
 	# takes in the alias
-	# returns 1 if error
+	# returns:
+	# 0 if the alias was deleted successfully
+	# 1 if the alias was not found
 
-	local test_if_exists
-	test_if_exists=$(sqlite3 --separator " <--- " "$db_path" "SELECT 1 FROM aliases WHERE keyword = '$1'; DELETE FROM aliases WHERE keyword= '$1';")
-	if [ -z "$test_if_exists" ]; then
+	before=$(grep -c "^$1" "$db_path")
+	sed -i "/^$1/d" "$db_path"
+	after=$(grep -c "^$1" "$db_path")
+
+	if [ $before -le $after ]; then
 		echo "AliasNotFound: '$1'"
+		return 1
 	fi
+	return 0
 }
 _db_remove_cwd() {
 	# returns 1 if error
