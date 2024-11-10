@@ -6,13 +6,15 @@ output=""
 
 _db_dump() {
 	# takes in nothing
-	# sets output = list of (keyword, path)
-	# returns 1 if table is empty
+	# returns:
+	# 0 if the database is not empty
+	# 1 if the databse is empty 
 
 	local table
-	table=$(sqlite3 --separator " <--- " "$db_path" "SELECT * FROM aliases")
+	table=$(cat "$db_path")
 	if [[ $table ]]; then
-		output="$table"
+		printf "$table"
+		return 0
 	else
 		echo "AliasNotFound: No Aliases Found"
 		return 1
