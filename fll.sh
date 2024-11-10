@@ -60,7 +60,7 @@ _db_remove_alias() {
 	# 1 if the alias was not found
 
 	before=$(grep -c "^$1" "$db_path")
-	sed -i "/^$1/d" "$db_path"
+	sed -i "/^$1, /d" "$db_path"
 	after=$(grep -c "^$1" "$db_path")
 
 	if [ $before -le $after ]; then
