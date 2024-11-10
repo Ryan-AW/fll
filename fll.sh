@@ -6,13 +6,15 @@ output=""
 
 _db_dump() {
 	# takes in nothing
-	# sets output = list of (keyword, path)
-	# returns 1 if table is empty
+	# returns:
+	# 0 if the database is not empty
+	# 1 if the databse is empty 
 
 	local table
-	table=$(sqlite3 --separator " <--- " "$db_path" "SELECT * FROM aliases")
+	table=$(cat "$db_path")
 	if [[ $table ]]; then
-		output="$table"
+		printf "$table"
+		return 0
 	else
 		echo "AliasNotFound: No Aliases Found"
 		return 1
@@ -21,12 +23,16 @@ _db_dump() {
 _db_get_path() {
 	# takes in the alias
 	# sets output = path of alias
-	# returns 1 if alias not found
+	# returns:
+	# 0 if alias found
+	# 1 if alias not found
 
-	local new_path
-	new_path=$(sqlite3 "$db_path" "SELECT path FROM aliases WHERE keyword = '$1'")
-	if [[ $new_path ]]; then
-		output="$new_path"
+	local result
+	result=$(awk -v key="$1" 'BEGIN {FS=", "; OFS=", "} $1 == key {line = substr($0, index($0, ", ") + 2)} END {print line}' "$db_path")
+
+	if [ -n "$result" ]; then
+		output="$result"
+		return 0
 	else
 		echo "AliasNotFound: '$1'"
 		return 1
@@ -34,32 +40,52 @@ _db_get_path() {
 }
 _db_set_alias() {
 	# takes in the alias and a path
-	# returns 1 if error
+	# returns:
+	# 0 if the alias name is valid
+	# 1 if the alias can't be saved due to having an invalid name
 
 	if [[ "$1" =~ ^[[:alnum:].-_]*$ ]]; then
-		sqlite3 "$db_path" "REPLACE INTO aliases VALUES ('$1', '$(readlink -f "$2")')" && return 0
+		_db_remove_alias "$1" > /dev/null
+		echo "$1, $(readlink -f "$2")" >> "$db_path"
+		return 0
+	else
+		echo "'$1' is not a valid name for an alias"
 		return 1
 	fi
-	echo "'$1' is not a valid name for an alias"
-	return 1
 }
 _db_remove_alias() {
 	# takes in the alias
-	# returns 1 if error
+	# returns:
+	# 0 if the alias was deleted successfully
+	# 1 if the alias was not found
 
-	local test_if_exists
-	test_if_exists=$(sqlite3 --separator " <--- " "$db_path" "SELECT 1 FROM aliases WHERE keyword = '$1'; DELETE FROM aliases WHERE keyword= '$1';")
-	if [ -z "$test_if_exists" ]; then
+	before=$(grep -c "^$1" "$db_path")
+	sed -i "/^$1, /d" "$db_path"
+	after=$(grep -c "^$1" "$db_path")
+
+	if [ $before -le $after ]; then
 		echo "AliasNotFound: '$1'"
+		return 1
 	fi
+	return 0
 }
 _db_remove_cwd() {
-	# returns 1 if error
+	# takes in nothing
+	# returns:
+	# 0 if an alias was deleted successfully
+	# 1 if an alias was not found
 
-	local test_if_exists
-	test_if_exists=$(sqlite3 --separator " <--- " "$db_path" "SELECT 1 FROM aliases WHERE path = '$(pwd)'; DELETE FROM aliases WHERE path = '$(pwd)';")
-	if [ -z "$test_if_exists" ]; then
+	local temp_file
+	temp_file=$(mktemp)
+
+	grep -v ", $(pwd)$" "$db_path" > "$temp_file"
+
+	if cmp "$db_path" "$temp_file" > /dev/null; then
 		echo "AliasNotFound: No aliases set to current directory found"
+		return 1
+	else
+		mv "$temp_file" "$db_path"
+		return 0
 	fi
 }
 _goto_alias() {
