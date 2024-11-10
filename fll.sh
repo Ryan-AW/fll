@@ -23,12 +23,16 @@ _db_dump() {
 _db_get_path() {
 	# takes in the alias
 	# sets output = path of alias
-	# returns 1 if alias not found
+	# returns:
+	# 0 if alias found
+	# 1 if alias not found
 
-	local new_path
-	new_path=$(sqlite3 "$db_path" "SELECT path FROM aliases WHERE keyword = '$1'")
-	if [[ $new_path ]]; then
-		output="$new_path"
+	local result
+	result=$(awk -v key="$1" 'BEGIN {FS=", "; OFS=", "} $1 == key {line = substr($0, index($0, ", ") + 2)} END {print line}' "$db_path")
+
+	if [ -n "$result" ]; then
+		output="$result"
+		return 0
 	else
 		echo "AliasNotFound: '$1'"
 		return 1
