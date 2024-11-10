@@ -66,12 +66,22 @@ _db_remove_alias() {
 	return 0
 }
 _db_remove_cwd() {
-	# returns 1 if error
+	# takes in nothing
+	# returns:
+	# 0 if an alias was deleted successfully
+	# 1 if an alias was not found
 
-	local test_if_exists
-	test_if_exists=$(sqlite3 --separator " <--- " "$db_path" "SELECT 1 FROM aliases WHERE path = '$(pwd)'; DELETE FROM aliases WHERE path = '$(pwd)';")
-	if [ -z "$test_if_exists" ]; then
+	local temp_file
+	temp_file=$(mktemp)
+
+	grep -v ", $(pwd)$" "$db_path" > "$temp_file"
+
+	if cmp "$db_path" "$temp_file" > /dev/null; then
 		echo "AliasNotFound: No aliases set to current directory found"
+		return 1
+	else
+		mv "$temp_file" "$db_path"
+		return 0
 	fi
 }
 _goto_alias() {
