@@ -40,14 +40,18 @@ _db_get_path() {
 }
 _db_set_alias() {
 	# takes in the alias and a path
-	# returns 1 if error
+	# returns:
+	# 0 if the alias name is valid
+	# 1 if the alias can't be saved due to having an invalid name
 
 	if [[ "$1" =~ ^[[:alnum:].-_]*$ ]]; then
-		sqlite3 "$db_path" "REPLACE INTO aliases VALUES ('$1', '$(readlink -f "$2")')" && return 0
+		_db_remove_alias "$1" > /dev/null
+		echo "$1, $(readlink -f "$2")" >> "$db_path"
+		return 0
+	else
+		echo "'$1' is not a valid name for an alias"
 		return 1
 	fi
-	echo "'$1' is not a valid name for an alias"
-	return 1
 }
 _db_remove_alias() {
 	# takes in the alias
