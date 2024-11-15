@@ -9,7 +9,7 @@ _fll_completion() {
 	cur="${COMP_WORDS[COMP_CWORD]}"
 	prev="${COMP_WORDS[COMP_CWORD-1]}"
 
-	aliases="$(sqlite3 "$db_path" "SELECT keyword FROM aliases")"
+	aliases=$(cut -d, -f1 "$db_path")
 
 
 	if [ $COMP_CWORD -eq 1 ]; then

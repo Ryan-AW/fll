@@ -14,11 +14,6 @@ user@test-user:/$ fll path1                        # changes directory using the
 user@test-user:/this/is/a/sample/path$ 
 ```
 
-## Install dependencies
-``` console
-sudo apt install sqlite3
-```
-
 ## Install
 ``` console
 git clone https://github.com/Ryan-AW/fll ~/fll
@@ -31,7 +26,7 @@ source "${HOME}/fll/fll_completion.sh"
 **important**
 Ensure that the path points to where you cloned the repository.
 
-(Note: You may need to restart your terminal or run `source ~/.bashrc` (or `source ~/.zshrc` if you use Zsh) for the changes to take effect.)
+(Note: You need to restart your terminal or run `source ~/.bashrc` (or `source ~/.zshrc` if you use Zsh) for the changes to take effect.)
 
 **warning**
 This program must be run as a source file otherwise it will not work.
