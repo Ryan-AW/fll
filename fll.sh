@@ -93,8 +93,24 @@ _run_alias() {
 	# sets output = path of alias
 	# returns 1 if error
 
-	_db_get_path "$1" && cd "$output"
-	return "$?"
+	_db_get_path "$1" || return "1"
+
+	  if [ ! -e "$output" ]; then
+		echo "$output does not exist."
+		return "1"
+
+	  elif [ -d "$output" ]; then
+		cd "$output" || return 1
+
+	  elif [ -f "$output" ]; then
+		cat "$output" || return "1"
+
+	  else
+		echo "$output is neither a file nor a directory."
+		return "1"
+	  fi
+
+	return "0"
 }
 _help() {
 	# takes in all arguments
