@@ -88,7 +88,7 @@ _db_remove_cwd() {
 		return 0
 	fi
 }
-_goto_alias() {
+_run_alias() {
 	# takes in the alias
 	# sets output = path of alias
 	# returns 1 if error
@@ -190,7 +190,7 @@ _handle_aliases() {
 	fi
 
 	if [[ "$1" ]]; then
-		_goto_alias "$1" && return 2
+		_run_alias "$1" && return 2
 		return "$?"
 	fi
 }
@@ -223,7 +223,7 @@ unset _db_get_path
 unset _db_set_alias
 unset _db_remove_alias
 unset _db_remove_cwd
-unset _goto_alias
+unset _run_alias
 unset _help
 unset _print
 unset _remove
