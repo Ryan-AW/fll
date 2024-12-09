@@ -14,7 +14,7 @@ _fll_completion() {
 
 	if [ $COMP_CWORD -eq 1 ]; then
 		if [[ "$cur" == -* ]]; then
-			COMPREPLY=( $(compgen -W "$(compgen -d -- "$cur") --print --remove --help --script" -- $cur) )
+			COMPREPLY=( $(compgen -W "$(compgen -d -- "$cur") --print --remove --help" -- $cur) )
 		else
 			COMPREPLY=( $(compgen -W "$aliases" -- $cur) )
 		fi
