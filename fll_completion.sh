@@ -35,7 +35,15 @@ _fll_completion() {
 				COMPREPLY=( $(compgen -W "$aliases" -- $cur) )
 				return 0;;
 			*)
-				COMPREPLY=( $(compgen -f -- "$cur") )
+				if [[ $aliases =~ (^|$'\n')$prev($|$'\n') ]]; then
+					if [[ "$cur" =~ ^- ]]; then
+						COMPREPLY=( $(compgen -fW "$options" -- "$cur") )
+					else
+						COMPREPLY=( $(compgen -f -- "$cur") )
+					fi
+				else
+					COMPREPLY=( $(compgen -f -- "$cur") )
+				fi
 				return 0;;
 		esac
 	fi
