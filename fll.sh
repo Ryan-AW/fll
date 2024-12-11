@@ -88,13 +88,29 @@ _db_remove_cwd() {
 		return 0
 	fi
 }
-_goto_alias() {
+_run_alias() {
 	# takes in the alias
 	# sets output = path of alias
 	# returns 1 if error
 
-	_db_get_path "$1" && cd "$output"
-	return "$?"
+	_db_get_path "$1" || return "1"
+
+	  if [ ! -e "$output" ]; then
+		echo "$output does not exist."
+		return "1"
+
+	  elif [ -d "$output" ]; then
+		cd "$output" || return 1
+
+	  elif [ -f "$output" ]; then
+		cat "$output" || return "1"
+
+	  else
+		echo "$output is neither a file nor a directory."
+		return "1"
+	  fi
+
+	return "0"
 }
 _help() {
 	# takes in all arguments
@@ -118,7 +134,7 @@ _help() {
 			echo '  fll myAlias /path/to/save  Set the path for "myAlias" to "/path/to/save"'
 			echo
 			echo 'Using an alias:'
-			echo '  fll myAlias     Change directory using "myAlias" alias'
+			echo '  fll myAlias     Execute "myAlias" alias'
 			echo
 			echo 'Removing aliases:'
 			echo '  fll -r          Unassigns all aliases that point to the current working directory'
@@ -190,7 +206,7 @@ _handle_aliases() {
 	fi
 
 	if [[ "$1" ]]; then
-		_goto_alias "$1" && return 2
+		_run_alias "$1" && return 2
 		return "$?"
 	fi
 }
@@ -223,7 +239,7 @@ unset _db_get_path
 unset _db_set_alias
 unset _db_remove_alias
 unset _db_remove_cwd
-unset _goto_alias
+unset _run_alias
 unset _help
 unset _print
 unset _remove
