@@ -10,11 +10,12 @@ _fll_completion() {
 	prev="${COMP_WORDS[COMP_CWORD-1]}"
 
 	aliases=$(cut -d, -f1 "$db_path")
+	options='--print --remove --help'
 
 
 	if [ $COMP_CWORD -eq 1 ]; then
 		if [[ "$cur" == -* ]]; then
-			COMPREPLY=( $(compgen -W "$(compgen -d -- "$cur") --print --remove --help" -- $cur) )
+			COMPREPLY=( $(compgen -W "$aliases $options" -- $cur) )
 		else
 			COMPREPLY=( $(compgen -W "$aliases" -- $cur) )
 		fi
