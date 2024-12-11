@@ -29,11 +29,7 @@ _fll_completion() {
 				COMPREPLY=( $(compgen -W "$aliases" -- $cur) )
 				return 0;;
 			*)
-				if [[ "$cur" == -* ]]; then
-					COMPREPLY=( $(compgen -W "$(compgen -d -- "$cur") --print --remove" -- $cur) )
-				else
-					COMPREPLY=( $(compgen -d -- "$cur") )
-				fi
+				COMPREPLY=( $(compgen -f -- "$cur") )
 				return 0;;
 		esac
 	fi
