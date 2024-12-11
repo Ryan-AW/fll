@@ -25,9 +25,6 @@ _fll_completion() {
 		case "$prev" in
 			--help|-h)
 				return 0;;
-			--script|-s)
-				COMPREPLY=( $(compgen -W "$aliases" -- $cur) )
-				return 0;;
 			--print|-p|--remove|-r)
 				COMPREPLY=( $(compgen -W "$aliases" -- $cur) )
 				return 0;;
