@@ -6,6 +6,7 @@ _fll_completion() {
 	db_path="$(dirname "${BASH_SOURCE[0]:-${(%):-%x}}")/aliases.db"
 
 	COMPREPLY=()
+	next="${COMP_WORDS[COMP_CWORD+1]}"
 	cur="${COMP_WORDS[COMP_CWORD]}"
 	prev="${COMP_WORDS[COMP_CWORD-1]}"
 
@@ -14,11 +15,16 @@ _fll_completion() {
 
 
 	if [ $COMP_CWORD -eq 1 ]; then
-		if [[ "$cur" == -* ]]; then
-			COMPREPLY=( $(compgen -W "$aliases $options" -- $cur) )
-		else
-			COMPREPLY=( $(compgen -W "$aliases" -- $cur) )
-		fi
+		case "$next" in
+			--help|-h)
+				return 0;;
+			--print|-p|--remove|-r)
+				COMPREPLY=( $(compgen -W "$aliases" -- $cur) )
+				return 0;;
+			*)
+				COMPREPLY=( $(compgen -W "$aliases" -- $cur) )
+				return 0;;
+		esac
 		return 0
 
 	elif [ $COMP_CWORD -eq 2 ]; then
