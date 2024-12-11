@@ -134,7 +134,7 @@ _help() {
 			echo '  fll myAlias /path/to/save  Set the path for "myAlias" to "/path/to/save"'
 			echo
 			echo 'Using an alias:'
-			echo '  fll myAlias     Change directory using "myAlias" alias'
+			echo '  fll myAlias     Execute "myAlias" alias'
 			echo
 			echo 'Removing aliases:'
 			echo '  fll -r          Unassigns all aliases that point to the current working directory'
